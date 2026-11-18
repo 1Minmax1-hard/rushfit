@@ -38,7 +38,7 @@ A **single-file, local-only** training and nutrition tool. Open it and it works 
 ### On a computer
 Download `index.html` and open it in any browser. Everything is stored in that browser's localStorage.
 
-### Deploy it (recommended — this is how phones get it)
+Deploy it (recommended — this is how phones get it)
 
 ```bash
 git clone https://github.com/1Minmax1-hard/rushfit.git
@@ -52,9 +52,11 @@ cd rushfit
 
 > GitHub Pages can be slow or unreachable from mainland China. Cloudflare Pages is usually steadier there; the code is identical.
 
+> Note: in-app browsers (WeChat, Weibo, Instagram) have no "Add to Home Screen", so installing will fail there. Copy the link and open it in a real browser first.
+
 ### Install on iPhone / iPad (no App Store needed)
 
-1. Open the URL in **Safari** (Chrome cannot do this on iOS)
+1. Open <https://1minmax1-hard.github.io/rushfit/> in **Safari** (recommended; since iOS 16.4 Chrome, Edge and Firefox work too, same steps. Use this web address, not the `github.com/.../rushfit.git` clone URL)
 2. Tap the **Share** button
 3. Choose **Add to Home Screen**
 
@@ -62,7 +64,7 @@ It then opens full-screen with no address bar, and **works offline** once loaded
 
 ### Install on Android
 
-Open the URL in Chrome → menu → **Install app** (or "Add to Home screen"). Offline works the same way.
+Open <https://1minmax1-hard.github.io/rushfit/> in **Chrome** (recommended; other mainstream browsers work, but only Chrome — and Samsung Internet on Samsung phones — installs a real standalone app, while Firefox / Edge usually add a plain shortcut). Menu → **Install app** (or "Add to Home screen"). Offline works the same way.
 
 ### Backups
 

@@ -38,7 +38,7 @@
 ### 电脑
 下载 `index.html`，双击用浏览器打开即可。所有数据存在该浏览器的 localStorage 里。
 
-### 部署到网上（推荐，手机上也能用）
+部署到网上（推荐，手机上也能用）
 
 ```bash
 git clone https://github.com/1Minmax1-hard/rushfit.git
@@ -52,9 +52,11 @@ cd rushfit
 
 > 说明：GitHub Pages 在部分网络环境下访问较慢。如果主要给国内用户用，Cloudflare Pages 更稳一些；两者代码完全一样。
 
+> 提示：微信、微博等 App 的内置浏览器里没有「添加到主屏幕」，装不了。请先复制链接，用系统浏览器（Safari / Chrome）打开再装。
+
 ### 装到 iPhone / iPad（不需要 App Store）
 
-1. 用 **Safari** 打开上面的网址（必须是 Safari，Chrome 不行）
+1. 用 **Safari** 打开 <https://1minmax1-hard.github.io/rushfit/>（推荐；iOS 16.4 起 Chrome、Edge、Firefox 也能装，步骤完全一样。不要用 `github.com/.../rushfit.git` 那个仓库地址，这里要的是网页地址）
 2. 点底部的「分享」按钮
 3. 选「**添加到主屏幕**」→ 添加
 
@@ -62,9 +64,9 @@ cd rushfit
 
 ### 装到 Android
 
-用 Chrome 打开网址，右上角菜单 →「**安装应用**」或「添加到主屏幕」。同样支持离线。
+用 **Chrome** 打开 <https://1minmax1-hard.github.io/rushfit/>（推荐；其他主流浏览器也行，但只有 Chrome 和三星手机上的 Samsung Internet 装出来是独立应用，Firefox / Edge 通常只是快捷方式），右上角菜单 →「**安装应用**」或「添加到主屏幕」。同样支持离线。
 
-也可以用 Chrome 打开后菜单里选「下载」，得到一个独立的 HTML 文件，发给自己双击打开——但这种方式不缓存、不能离线，数据也跟网站版不互通。
+也可以用任意浏览器打开后菜单里选「下载」，得到一个独立的 HTML 文件，发给自己双击打开——但这种方式不缓存、不能离线，数据也跟网站版不互通。
 
 ### 换设备 / 备份
 
