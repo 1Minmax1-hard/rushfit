@@ -25,12 +25,14 @@ A **single-file, local-only** training and nutrition tool. Open it and it works 
 | **Progressive overload** | Each exercise shows "last 57 kg × 10, volume 1710 kg"; when you hit the top of the rep range it suggests "↑ try 62.5 kg" |
 | **Volume by muscle** | Weekly effective sets for 8 muscle groups (direct + 0.5 × indirect) against your target range, with one-tap catch-up |
 | **RIR & rest** | Target RIR and rest interval on every exercise; tap "Rest 120s" to start a countdown (floating bar, +30 s / skip, beep and vibration) |
-| **Body model** | Weight, body fat, muscle mass and segmental data drive a figure plus FFMI / TDEE. Sex is selectable and the body-fat target is editable; works with incomplete data |
-| **Nutrition** | Eaten / target / gap, with different targets on training and rest days; daily TDEE split so the weekly total is conserved |
-| **Balancer** | Pick the foods you actually have; a weighted least-squares solve returns grams. **Same input, same output, every time.** Lock a food and it stays put |
+| **Body model** | Weight, body fat, muscle mass and segmental data drive a figure plus FFMI / TDEE. Sex is selectable and the body-fat target is editable; activity is split into “daily activity (excl. training)” and “sessions per week” so a desk job can still train five times; works with incomplete data |
+| **Nutrition** | Eaten / target / gap, with different targets on training and rest days; daily TDEE split so the weekly total is conserved; sodium tracked against a 5 g salt (2000 mg) ceiling — the sodium naturally present in foods is added automatically, salt and sauces are manual |
+| **Nutrition score** | A 0–100 score from protein, calories, carbs, fat, fibre and sodium — undereating and overeating both lose points. The ring gives the total, with a one-line nudge that changes by score band (stable within a day); sodium is left out of the weighting until logged |
+| **What you ate** | Every quick-add is kept and listed in order, so you can see the day's meals and remove a single entry (it is subtracted from the total) |
+| **Balancer** | Pick the foods you actually have; a weighted least-squares solve returns grams. **Same input, same output, every time.** Lock a food and it stays put; portions can exclude meat at breakfast |
 | **Method library** | 19 goal + split + prescription bundles, sorted by your current goal and marked ★; apply the whole thing or just the split |
 | **Templates** | Save once, reuse for three months, with a review reminder |
-| **Plugins** | Four built-in toggles and a tiny API to write your own |
+| **Plugins** | Five built-in toggles (muscle tags on every exercise are **on by default**) and a tiny API to write your own |
 | **English / 中文** | One-tap language switch in the top bar; the choice is remembered |
 
 ## Quick start
