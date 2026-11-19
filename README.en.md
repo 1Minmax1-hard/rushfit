@@ -20,6 +20,8 @@ A **single-file, local-only** training and nutrition tool. Open it and it works 
 
 | Module | Details |
 |---|---|
+| **Guided tour** | First open (or when the tour itself is updated) walks you through six steps: pick a goal, pick a training method, import body data, read today's intake and score, use the "what's left" balancer, then set up your week. Everything but the target is dimmed; skippable, and replayable from Plugins → About → Show the tour |
+| **Goal** | The first card on Templates: cut / tone / bulk / maintain / energy / performance. One tap recalculates calories, protein and carbs, with the method library right below |
 | **Schedule** | Week and month views, training days highlighted. Pick the session for any day (full-body A/B, upper/lower, push/pull/legs, or blank) and swap it later |
 | **Logging** | Tick sets off, add or remove sets freely, weight and reps carry over from last time. Swipe left to swap or delete, long-press to reorder |
 | **Progressive overload** | Each exercise shows "last 57 kg × 10, volume 1710 kg"; when you hit the top of the rep range it suggests "↑ try 62.5 kg" |
