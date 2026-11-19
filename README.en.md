@@ -27,13 +27,16 @@ A **single-file, local-only** training and nutrition tool. Open it and it works 
 | **RIR & rest** | Target RIR and rest interval on every exercise; tap "Rest 120s" to start a countdown (floating bar, +30 s / skip, beep and vibration) |
 | **Body model** | Weight, body fat, muscle mass and segmental data drive a figure plus FFMI / TDEE. Sex is selectable and the body-fat target is editable; activity is split into “daily activity (excl. training)” and “sessions per week” so a desk job can still train five times; works with incomplete data |
 | **Nutrition** | Eaten / target / gap, with different targets on training and rest days; daily TDEE split so the weekly total is conserved; sodium tracked against a 5 g salt (2000 mg) ceiling — the sodium naturally present in foods is added automatically, salt and sauces are manual |
+| **Editing what you ate** | Long-press a progress bar for 1 s — it thickens and buzzes — then drag left / right to set the value (sodium and calories move in steps of 5, everything else in 1). Prefer tapping? Use the little stepper beside the bar (up/down on desktop, two bigger left/right buttons in the first row on phones). |
 | **Nutrition score** | A 0–100 score from protein, calories, carbs, fat, fibre and sodium — undereating and overeating both lose points. The ring gives the total, with a one-line nudge that changes by score band (stable within a day); sodium is left out of the weighting until logged |
 | **What you ate** | Every quick-add is kept and listed in order, so you can see the day's meals and remove a single entry (it is subtracted from the total) |
 | **Balancer** | Pick the foods you actually have; a weighted least-squares solve returns grams. **Same input, same output, every time.** Lock a food and it stays put; long-press a food to reorder the list or drag it to the top of the page to remove it; portions can exclude meat at breakfast |
 | **Custom food** | Lives right under Quick log — enter macros per 100 g. **Add it once and it works everywhere**: quick log, balancing and the daily quota |
+| **Edit a food** | Long-press any chip under the balancing foods to enter edit mode, tap one to select it, then press **Edit** in the corner and change the numbers — saving overwrites that entry (built-ins included, and beef · lean vs beef · fatty are edited separately). Tap anywhere blank to finish |
 | **Method library** | 19 goal + split + prescription bundles, sorted by your current goal and marked ★; apply the whole thing or just the split |
 | **Templates** | Save once, reuse for three months, with a review reminder |
 | **Plugins** | Five built-in toggles (muscle tags on every exercise are **on by default**) and a tiny API to write your own |
+| **Import data** | Under Plugins → Write your own you can import body data and custom foods from a JSON file — it only writes those two, never your logs. The same card holds a **prompt for an AI**: paste it with a screenshot from your scale or health app and it returns a file you can import |
 | **English / 中文** | One-tap language switch in the top bar; the choice is remembered |
 | **Font size** | The “Aa” button switches between 100 / 110 / 120 / 130%, default 110%. The whole layout scales up together — type, line height and spacing — so text never spills out of its card |
 
@@ -72,7 +75,26 @@ Open <https://1minmax1-hard.github.io/rushfit/> in **Chrome** (recommended; othe
 
 ### Backups
 
-The Plugins page has **Export / Import**. Export weekly — browsers can evict localStorage (long periods without opening, or clearing site data). The export is a complete JSON file.
+The Plugins page has **Export / Import**. Export weekly — browsers can evict localStorage (long periods without opening, or clearing site data). The export is a complete JSON file **including body data, custom foods and every training / food log**, so importing it on a new phone brings everything back.
+
+If you only want to move body data and the foods you added yourself, use **Plugins → Write your own → Import data** instead: it writes those two and leaves your logs untouched. No file yet? Switch to **Prompt**, paste it into an AI with a screenshot of your scale or health app, and use the file it returns.
+
+Minimal format (every field is optional — anything missing will not overwrite what you already have; food values are per 100 g, and `per` is rescaled automatically when it is not 100):
+
+```json
+{
+  "rushfit": "pack", "v": 1,
+  "profile": { "sex": "male", "age": 23, "height": 178, "weight": 72.4,
+               "bodyFat": 17.5, "muscleMass": 58.2, "bmr": 1700, "water": 58,
+               "visceral": 8, "bone": 3.2, "bfGoal": 15,
+               "segTorso": 26.1, "segArmR": 3.2, "segArmL": 3.2, "segLegR": 8.7, "segLegL": 8.6 },
+  "foods": [ { "name": "Cafeteria pork belly", "per": 100, "kcal": 330, "p": 12.4, "f": 28, "c": 4.1,
+               "fiber": 0.2, "sugar": 2.5, "na": 610 } ],
+  "weights": [ { "date": "2026-11-17", "kg": 72.4 } ]
+}
+```
+
+Foods with the same name are skipped, out-of-range numbers (a 300 cm height, say) are ignored, and a file that contains `logs` (a full backup) will be sent to the Backup import instead.
 
 ## Language
 
