@@ -128,6 +128,11 @@ p{margin:0}
 }
 .goal-seg button:hover{color:var(--ink)}
 .goal-seg button.on{background:#fff;color:var(--accent-2);font-weight:650;box-shadow:0 1px 3px rgba(16,32,25,.12)}
+
+/* 模板页里的目标选择：整行铺开，六个目标等分 */
+.goal-seg-lg{padding:4px;gap:4px}
+.goal-seg-lg button{flex:1 1 0;min-width:74px;padding:8px 10px;font-size:13px;text-align:center}
+.goal-tip{margin:10px 0 0;font-size:12.5px;line-height:1.6;color:var(--ink-3)}
 .tb-right{display:flex;align-items:center;gap:10px;min-width:0;flex-wrap:wrap;justify-content:flex-end;row-gap:6px}
 .lang-btn{
   font:inherit;font-size:11.5px;font-weight:650;letter-spacing:.02em;white-space:nowrap;
@@ -719,11 +724,12 @@ pre.prompt b{color:var(--accent-2);font-weight:650}
   .nav-item.on::before{display:none}
   .nav-item svg{width:19px;height:19px}
 
-  .topbar{flex-direction:column;align-items:stretch;gap:8px;padding:10px 14px}
-  .tb-left{justify-content:space-between}
-  .goal-seg{width:100%;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:3px}
-  .goal-seg::-webkit-scrollbar{display:none}
-  .goal-seg button{flex:none;padding:6px 12px}
+  .topbar{flex-direction:row;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px}
+  .tb-left{justify-content:flex-start}
+  /* 目标栏已经挪进「模板」页，这里只管卡片内的排布 */
+  .goal-seg{width:100%}
+  .goal-seg-lg{flex-wrap:wrap}
+  .goal-seg-lg button{flex:1 1 40%;padding:9px 8px;font-size:12.5px}
 
   .view{padding:14px 12px 96px}
   .toast{bottom:150px}
@@ -742,17 +748,9 @@ pre.prompt b{color:var(--accent-2);font-weight:650}
   .model-stage{grid-template-columns:1fr}
   .port-tiles{grid-template-columns:1fr 1fr}
   .week-toolbar{gap:8px}
-  .topbar{
-    display:grid;grid-template-columns:1fr auto;
-    grid-template-areas:"title lang" "goals goals";
-    gap:8px 10px;align-items:center;
-  }
-  .tb-left{grid-area:title;min-width:0}
-  .tb-right{display:contents}
-  .lang-btn{grid-area:lang}
-  .goal-seg{grid-area:goals;min-width:0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;justify-content:flex-start}
-  .goal-seg::-webkit-scrollbar{display:none}
-  .goal-seg button{flex:none;padding:4px 8px;font-size:11.5px}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .tb-left{min-width:0}
+  .tb-right{display:flex;align-items:center;justify-content:flex-end}
   .wk-label{min-width:auto;font-size:12.5px}
 
   /* 训练动作卡片 */
@@ -933,6 +931,34 @@ body.ex-dragging .ex-shell:not(.dragging){opacity:.72}
   .m-gap{width:auto}
   .m-eat{white-space:nowrap}
 }
+
+/* ---------- 新手指引：只把要点的那个东西留出来 ---------- */
+.gd-r{position:fixed;z-index:900;background:rgba(9,20,16,.56);-webkit-tap-highlight-color:transparent}
+.gd-ring{
+  position:fixed;z-index:901;border-radius:12px;pointer-events:none;
+  box-shadow:0 0 0 2px var(--accent), 0 0 0 7px rgba(13,110,99,.16), 0 18px 44px -18px rgba(0,0,0,.6);
+}
+.gd-card{
+  position:fixed;z-index:902;left:50%;transform:translateX(-50%);
+  box-sizing:border-box;
+  width:min(400px, calc(100vw - 24px));
+  background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px 12px;
+  box-shadow:0 26px 64px -26px rgba(9,20,16,.6);
+}
+.gd-top{display:flex;align-items:center;gap:8px;margin:0 0 7px}
+.gd-step{font-size:11px;font-weight:700;letter-spacing:.05em;color:var(--accent-2)}
+.gd-dots{display:flex;align-items:center;gap:4px;margin-left:auto}
+.gd-dots i{width:5px;height:5px;border-radius:50%;background:#cfdad6;transition:.16s}
+.gd-dots i.on{width:15px;border-radius:3px;background:var(--accent)}
+.gd-card h4{margin:0 0 5px;font-size:14.5px;letter-spacing:0}
+.gd-card p{margin:0 0 11px;font-size:12.5px;line-height:1.68;color:var(--ink-2)}
+.gd-btns{display:flex;align-items:center;gap:8px;justify-content:flex-end}
+.gd-btns .gd-skip{margin-right:auto;color:var(--ink-3);font-size:12px}
+@media (max-width:560px){
+  .gd-card{padding:13px 14px 11px;border-radius:13px}
+  .gd-card h4{font-size:14px}
+  .gd-card p{font-size:12px}
+}
 </style>
 </head>
 <body>
@@ -988,7 +1014,6 @@ body.ex-dragging .ex-shell:not(.dragging){opacity:.72}
           <button class="fs-btn" data-action="cycleFs" id="fsBtn" title="调整字号">Aa</button>
           <button class="lang-btn" data-action="toggleLang" id="langBtn">EN</button>
         </div>
-        <div class="goal-seg" id="goalSeg"></div>
       </div>
     </header>
     <div class="view" id="view"></div>
@@ -1376,6 +1401,9 @@ const SEG_RANGE = {
 /* 词典以中文原文为键：渲染后统一替换，避免在 700 处调用点逐个包 t()。
    替换按长度倒序，长词优先，所以「组间」不会先被「组」吃掉。 */
 var EN = {
+  "改目标会同时调整热量、蛋白与碳水分配": "Changing the goal recalculates calories, protein and carbs",
+  "看新手指引": "Replay the tour",
+  "健身目标": "Goal",
   "加一条就能出分。": "Add one entry to get a score.",
   "1 g 盐 ≈ 400 mg 钠 · 1 汤匙生抽 ≈ 1000 mg": "1 g salt ≈ 400 mg sodium · 1 tbsp soy sauce ≈ 1000 mg",
   "全局通用": "Global",
@@ -2827,8 +2855,11 @@ function viewWeek(){
           '<button data-action="calMode" data-mode="week" class="' + (S.ui.calMode!=='month'?'on':'') + '">' + (S.lang==='en'?'Week':'周') + '</button>' +
           '<button data-action="calMode" data-mode="month" class="' + (S.ui.calMode==='month'?'on':'') + '">' + (S.lang==='en'?'Month':'月') + '</button>' +
           '</div>';
-  html += '<button class="btn sm" data-action="toggleSetup">排课设置</button>';
-  html += '<button class="btn sm" data-action="saveWeekTpl">存为模板</button>';
+  html += '<button class="btn sm" data-action="toggleSetup" id="btnSetup">排课设置</button>';
+  html += '<button class="btn sm icon" data-action="saveWeekTpl" title="存为模板" aria-label="存为模板">' +
+          '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+          '<path d="M19.5 21h-15A1.5 1.5 0 0 1 3 19.5v-15A1.5 1.5 0 0 1 4.5 3h11.4L21 7.1v12.4A1.5 1.5 0 0 1 19.5 21Z"/>' +
+          '<path d="M7 3v6h7.5V3"/><path d="M7 21v-7h10v7"/></svg></button>';
   html += '</div></div>';
 
   if (S.ui.setup) html += setupPanel();
@@ -3383,7 +3414,7 @@ function viewNutrition(){
   html += '<div class="nut-grid">';
 
   /* 左：追踪表 */
-  html += '<div class="card"><div class="card-hd"><h3>今日摄入</h3></div><div class="card-bd">';
+  html += '<div class="card" id="cardIntake"><div class="card-hd"><h3>今日摄入</h3></div><div class="card-bd">';
   html += '<table class="macro-table"><thead><tr><th>营养素</th><th>已吃 / 应吃</th><th>进度</th><th style="text-align:right">差额</th></tr></thead><tbody>';
 
   var rows = [
@@ -3466,7 +3497,7 @@ function viewNutrition(){
   var gN = gapNow(dk);
   html += '<div style="display:flex;flex-direction:column;gap:16px">';
 
-  html += '<div class="card"><div class="card-hd"><h3>还差什么，怎么补</h3></div><div class="card-bd">';
+  html += '<div class="card" id="cardBalance"><div class="card-hd"><h3>还差什么，怎么补</h3></div><div class="card-bd">';
 
   html += '<div class="gap-line">当前缺口：蛋白 <b class="num">' + Math.round(gN.p) + ' g</b> · ' +
           '碳水 <b class="num">' + Math.round(gN.c) + ' g</b> · ' +
@@ -3928,6 +3959,13 @@ function methodCard(m, starred){
 function viewTemplates(){
   var html = '';
 
+  /* 健身目标：从顶栏挪到这里，先定目标再看方法库 */
+  html += '<div class="card" id="cardGoal"><div class="card-hd"><h3>健身目标</h3>' +
+          '<span class="hint">改目标会同时调整热量、蛋白与碳水分配</span></div><div class="card-bd">' +
+          '<div class="goal-seg goal-seg-lg" id="goalSeg"></div>' +
+          '<p class="goal-tip" id="goalTip"></p>' +
+          '</div></div>';
+
   /* 训练法库：当前目标置顶 + 星标，默认 4 张 */
   var mine = TRAINING_METHODS.filter(function(m){ return m.goal === S.goal; });
   var others = TRAINING_METHODS.filter(function(m){ return m.goal !== S.goal; });
@@ -3935,7 +3973,7 @@ function viewTemplates(){
   var open = !!S.ui.tplExpand;
   var show = open ? list : list.slice(0, 4);
 
-  html += '<div class="card"><div class="card-hd"><h3>训练法库</h3>' +
+  html += '<div class="card" id="cardMethodLib" style="margin-top:16px"><div class="card-hd"><h3>训练法库</h3>' +
           '<span class="hint">按目标排序 · ★ 是你当前的目标</span></div><div class="card-bd">';
   html += '<div class="mth-grid">';
   show.forEach(function(m){ html += methodCard(m, m.goal === S.goal); });
@@ -4279,7 +4317,7 @@ function packImportHtml(){
   html += '<div class="bal-actions" style="margin-top:12px">' +
           '<button class="btn sm primary" data-action="importPack">' + (ENm ? 'Choose a file' : '选择文件导入') + '</button>' +
           '<input type="file" id="importPackFile" accept="application/json,.json,.txt,text/plain" style="display:none"></div>';
-  html += '<div class="pack-paste">' +
+  html += '<div class="pack-paste" id="packBox">' +
           '<textarea id="packPaste" rows="3" spellcheck="false" placeholder="' +
             (ENm ? 'Paste the JSON here' : '把 AI 给的 JSON 粘到这里') + '">' + h(packDraft) + '</textarea>' +
           '<div class="bal-actions" style="margin-top:8px">' +
@@ -4353,6 +4391,7 @@ function viewPlugins(){
           '<button class="btn sm primary" data-action="exportData">导出备份</button>' +
           '<button class="btn sm" data-action="importData">导入备份</button>' +
           '<input type="file" id="importFile" accept="application/json,.json" style="display:none">' +
+          '<button class="btn sm ghost" data-action="guideReplay">看新手指引</button>' +
           '<span class="pack-sub">完整 JSON：身体数据、自定义食材、全部记录，换机导入即可</span></div>';
   html += '<p class="src" style="margin-top:12px;line-height:1.8">' +
           '<b>v' + APP_VERSION + '</b> · 许可证 <b>AGPL-3.0</b> · <a class="src-link" href="' + REPO_URL + '" target="_blank" rel="noopener noreferrer">源码（GitHub）</a>' +
@@ -4408,6 +4447,7 @@ function renderNow(){
   renderGoalSeg();
   mountSlots();
   applyShellLang();
+  if (typeof Guide !== 'undefined' && Guide.active()) Guide.sync();   /* 指引开着时，重绘后重新对位置 */
   /* 侧栏「就绪 / 已保存」这类文字是写入时翻译的，切语言后补一次 */
   var ls = el('lastSaved');
   if (ls && S.lang === 'en' && /[\u4e00-\u9fa5]/.test(ls.textContent)) ls.textContent = trTxt(ls.textContent);
@@ -4426,9 +4466,12 @@ function keepChipTop(id, top){
 
 function renderGoalSeg(){
   var box = el('goalSeg');
+  if (!box) return;                     /* 目标栏只在「模板」页出现 */
   box.innerHTML = GOAL_ORDER.map(function (k) {
     return '<button data-action="setGoal" data-goal="' + k + '" class="' + (S.goal===k?'on':'') + '">' + trTxt(GOALS[k].label) + '</button>';
   }).join('');
+  var tip = el('goalTip');
+  if (tip) tip.textContent = trTxt(GOALS[S.goal].tip || '');
 }
 
 /* ================= 事件 ================= */
@@ -4437,6 +4480,12 @@ document.addEventListener('click', function (e) {
   if (!t) return;
   var a = t.getAttribute('data-action');
   var d = t.dataset;
+
+  /* ---- 新手指引 ---- */
+  if (a === 'guideNext'){ Guide.next(); return; }
+  if (a === 'guidePrev'){ Guide.prev(); return; }
+  if (a === 'guideEnd'){ Guide.end(); return; }
+  if (a === 'guideReplay'){ S.ui.guide = { v:0, done:false }; save(); Guide.start(); return; }
 
   /* ---- 日历 ---- */
   if (a === 'calMode'){ S.ui.calMode = d.mode; save(); render(); return; }
@@ -5899,6 +5948,188 @@ document.addEventListener('click', function (e) {
   }, { passive: false });
 })();
 
+/* ================= 新手指引 ================= */
+/* 第一次打开、或指引内容更新过（V 变大）还没看过的人，走一遍聚光灯指引：
+   四周压暗、只把要点的那一个控件留出来，除了它点不到别的地方。 */
+var Guide = (function () {
+  var V = 2;                       /* 改了指引内容就把这个数 +1，看过旧版的人会再看一遍 */
+  function en(){ return S.lang === 'en'; }
+  function pick(o){ return en() ? o.en : o.zh; }
+
+  var STEPS = [
+    { view:'templates', sel:'#goalSeg',
+      t:{ zh:'先选一个健身目标', en:'Pick your goal first' },
+      d:{ zh:'减脂、塑形、增肌、维持、提高精力、运动表现——点一个。热量、蛋白和碳水会照着这个目标整套重算。',
+          en:'Cut, tone, bulk, maintain, energy or performance — tap one. Calories, protein and carbs are all recalculated around it.' } },
+    { view:'templates', sel:'#cardMethodLib .mth',
+      t:{ zh:'再挑一套训练法', en:'Then pick a training method' },
+      d:{ zh:'按目标排好了，★ 就是你现在的目标。点「套用」会把分化方式、训练日和每肌群组数一次装进周计划。',
+          en:'Sorted by goal — the ★ one matches yours. Tap Apply to load its split, training days and weekly set targets into the plan.' } },
+    { view:'plugins', sel:'#packBox',
+      t:{ zh:'身体数据不用一项项敲', en:'Skip typing your body data' },
+      d:{ zh:'把体脂秤截图丢给 AI，让它照「提示词」生成文件；回来粘到这里点导入身体数据，自定义食材也可以那么添加。',
+          en:'Send a smart-scale screenshot to an AI with the prompt, then paste the file it returns here and import your body data. Custom foods work the same way.' } },
+    { view:'nutrition', sel:'#cardIntake .macro-table',
+      t:{ zh:'吃了什么、还差什么', en:'What you ate, what is left' },
+      d:{ zh:'左边记今天吃进去的，右边告诉你还差多少；上面那个环是今天的评分。长按进度条还能直接拖数值。',
+          en:'Left side logs what you ate, right side shows what is still missing. The ring above is today’s score — long-press a bar to drag the number.' } },
+    { view:'nutrition', sel:'#cardBalance .bal-list, #cardBalance .empty-tip',
+      t:{ zh:'怎么补，让它算到克', en:'Let it work out the grams' },
+      d:{ zh:'勾的食材都列在这儿，每样该吃多少克也写好了；点「自动配平」会按上面的缺口重算，点「全部清零」回到自己挑。',
+          en:'Every food you ticked is listed with the grams that close the gap. Auto-balance recalculates from the numbers above; Clear all starts over.' } },
+    { view:'week', sel:'#btnSetup',
+      t:{ zh:'最后排自己的周计划', en:'Finally, build your week' },
+      d:{ zh:'「排课设置」里定每周练几天、哪天休息；点日历上任意一天，就能改当天的动作。',
+          en:'Use Set up week to choose training days and rest days; tap any day on the calendar to edit its exercises.' } }
+  ];
+
+  var i = -1, on = false, box = null, ring = null, card = null, t1 = 0, t2 = 0, ts = 0, tick = 0;
+
+  /* 滚动是异步的：先同步画一次，再在 60 / 280 ms 各补一次，
+     这样 rAF 被节流（后台标签、无头浏览器）时位置也不会错。 */
+  function later(){
+    clearTimeout(t1); clearTimeout(t2);
+    t1 = setTimeout(paint, 60);
+    t2 = setTimeout(paint, 280);
+  }
+
+  function build(){
+    if (box) return;
+    box = document.createElement('div');
+    box.id = 'guide';
+    box.innerHTML =
+      '<div class="gd-r" data-gd="t"></div><div class="gd-r" data-gd="b"></div>' +
+      '<div class="gd-r" data-gd="l"></div><div class="gd-r" data-gd="r"></div>' +
+      '<div class="gd-ring"></div><div class="gd-card" role="dialog" aria-live="polite"></div>';
+    document.body.appendChild(box);
+    ring = box.querySelector('.gd-ring');
+    card = box.querySelector('.gd-card');
+  }
+
+  function setR(k, x, y, w, h){
+    var e = box.querySelector('[data-gd="' + k + '"]');
+    if (!e) return;
+    e.style.left = Math.round(x) + 'px';
+    e.style.top = Math.round(y) + 'px';
+    e.style.width = Math.max(0, Math.round(w)) + 'px';
+    e.style.height = Math.max(0, Math.round(h)) + 'px';
+  }
+
+  function placeCard(atTop){
+    card.style.left = '50%';
+    if (atTop){ card.style.top = '16px'; card.style.bottom = 'auto'; }
+    else { card.style.top = 'auto'; card.style.bottom = '16px'; }
+  }
+
+  function paint(){
+    if (!on || i < 0) return;
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var t = document.querySelector(STEPS[i].sel);
+    var r = t ? t.getBoundingClientRect() : null;
+    if (!r || (!r.width && !r.height)){
+      setR('t', 0, 0, vw, vh); setR('b', 0, 0, 0, 0); setR('l', 0, 0, 0, 0); setR('r', 0, 0, 0, 0);
+      ring.style.display = 'none';
+      placeCard(false);
+      return;
+    }
+    ring.style.display = '';
+    var pad = 6;
+    var L = Math.max(0, r.left - pad), T = Math.max(0, r.top - pad);
+    var R = Math.min(vw, r.right + pad), B = Math.min(vh, r.bottom + pad);
+    /* 高亮框最多占屏 60%，并且必须给说明卡片留出位置 ——
+       否则手机上「今日摄入」那种比屏幕还高的目标，卡片会直接压在表格上。 */
+    var cardH = (card && card.offsetHeight) || 170;
+    var maxH = Math.min(vh * 0.6, Math.max(160, vh - cardH - 40));
+    if (B - T > maxH) B = T + maxH;
+    ring.style.left = Math.round(L) + 'px';
+    ring.style.top = Math.round(T) + 'px';
+    ring.style.width = Math.round(R - L) + 'px';
+    ring.style.height = Math.round(B - T) + 'px';
+    setR('t', 0, 0, vw, T);
+    setR('b', 0, B, vw, vh - B);
+    setR('l', 0, T, L, Math.max(0, B - T));
+    setR('r', R, T, vw - R, Math.max(0, B - T));
+    /* 卡片放在空间够的另一侧：下面够就放下，不够放上，两边都挤就挑大的那侧 */
+    var below = vh - B - 12, above = T - 12;
+    placeCard(below >= cardH ? false : (above >= cardH ? true : above > below));
+  }
+
+  function paintCard(){
+    var st = STEPS[i];
+    var dots = STEPS.map(function (_, k) { return '<i class="' + (k === i ? 'on' : '') + '"></i>'; }).join('');
+    card.innerHTML =
+      '<div class="gd-top"><span class="gd-step">' + (i + 1) + ' / ' + STEPS.length + '</span>' +
+        '<span class="gd-dots">' + dots + '</span></div>' +
+      '<h4>' + h(pick(st.t)) + '</h4><p>' + h(pick(st.d)) + '</p>' +
+      '<div class="gd-btns">' +
+        '<button class="btn sm ghost gd-skip" data-action="guideEnd">' + (en() ? 'Skip' : '跳过') + '</button>' +
+        (i > 0 ? '<button class="btn sm ghost" data-action="guidePrev">' + (en() ? 'Back' : '上一步') + '</button>' : '') +
+        '<button class="btn sm primary" data-action="guideNext">' +
+          (i === STEPS.length - 1 ? (en() ? 'Got it' : '知道了') : (en() ? 'Next' : '下一步')) + '</button>' +
+      '</div>';
+  }
+
+  function go(n){
+    i = Math.max(0, Math.min(STEPS.length - 1, n));
+    var st = STEPS[i], need = false;
+    if (st.view){
+      if (st.view === 'plugins'){ S.ui.plugTab = 'pack'; need = true; }   /* 第 3 步要落在「导入数据」这块 */
+      if (S.ui.view !== st.view){ S.ui.view = st.view; save(); need = true; }
+      if (need) render();
+    }
+    paintCard();
+    var t = document.querySelector(st.sel);
+    if (t && t.scrollIntoView){
+      try { t.scrollIntoView({ block:'center', behavior:'auto' }); } catch (e) {}
+    }
+    paint();                          /* 先同步画一次，位置立刻正确 */
+    later();                          /* 滚动落定后再校正 */
+  }
+
+  function start(){
+    if (on) return;
+    build();
+    on = true;
+    box.style.display = '';
+    document.documentElement.classList.add('gd-on');
+    go(0);
+    /* 图片/字体/滚动条都会让目标挪位置，指引开着的时候持续跟着量（6 次/秒，很轻） */
+    clearInterval(tick); tick = setInterval(paint, 160);
+  }
+
+  function end(){
+    if (!on) return;
+    on = false; i = -1;
+    if (box) box.style.display = 'none';
+    clearInterval(tick); tick = 0;
+    document.documentElement.classList.remove('gd-on');
+    S.ui.guide = { v: V, done: true };
+    save();
+  }
+
+  function next(){ if (i >= STEPS.length - 1) return end(); go(i + 1); }
+  function prev(){ if (i > 0) go(i - 1); }
+
+  /* 重绘后目标节点被换掉了，重新量一次位置 */
+  function sync(){ if (!on) return; paintCard(); paint(); later(); }
+
+  window.addEventListener('resize', function () { if (on) paint(); });
+  window.addEventListener('scroll', function () {
+    if (!on) return;
+    clearTimeout(ts); ts = setTimeout(paint, 40);
+  }, true);
+
+  return {
+    start: start, next: next, prev: prev, end: end, sync: sync,
+    active: function () { return on; },
+    version: V,
+    should: function () {
+      var g = S.ui && S.ui.guide;
+      return !g || +g.v < V;          /* 没走过，或者指引版本比看过的那个新 */
+    }
+  };
+})();
+
 /* 导航 */
 document.addEventListener('click', function (e) {
   var b = e.target.closest('.nav-item');
@@ -5915,12 +6146,18 @@ function init(){
   if (S.ui.meatBf == null) S.ui.meatBf = true;
   if (!S.mealsLog) S.mealsLog = {};
   if (!S.ui.nutDate) S.ui.nutDate = todayKey();
+  if (!S.ui.guide) S.ui.guide = { v: 0, done: false };
   if (!Array.isArray(S.foodsOn)) S.foodsOn = ['chicken','beef','shrimp','carrot','cabbage_baby'];
   applyFs();
   render();
   el('lastSaved').textContent = trTxt('就绪');
   applyShellLang();
   syncFsBtn();
+  /* 第一次打开、或者指引更新过还没看过的人，先走一遍 */
+  if (Guide.should()){
+    S.ui.view = 'templates'; save(); render();
+    setTimeout(function () { Guide.start(); }, 220);
+  }
 }
 
 function syncFsBtn(){
@@ -5935,6 +6172,7 @@ window.RushFit = { state:S, save:save, render:render, registerPlugin:registerPlu
   rest:{ start:startRest, stop:stopRest, left:rtLeft },
   t:trTxt };
 window.FitOS = window.RushFit;   // 旧名保留，避免老插件失效
+window.RushFit.guide = Guide;      // 指引也可以手动重放：RushFit.guide.start()
 
 /* PWA：注册 Service Worker，让「添加到主屏幕」后能离线打开 */
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
