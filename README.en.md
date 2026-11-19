@@ -29,11 +29,13 @@ A **single-file, local-only** training and nutrition tool. Open it and it works 
 | **Nutrition** | Eaten / target / gap, with different targets on training and rest days; daily TDEE split so the weekly total is conserved; sodium tracked against a 5 g salt (2000 mg) ceiling — the sodium naturally present in foods is added automatically, salt and sauces are manual |
 | **Nutrition score** | A 0–100 score from protein, calories, carbs, fat, fibre and sodium — undereating and overeating both lose points. The ring gives the total, with a one-line nudge that changes by score band (stable within a day); sodium is left out of the weighting until logged |
 | **What you ate** | Every quick-add is kept and listed in order, so you can see the day's meals and remove a single entry (it is subtracted from the total) |
-| **Balancer** | Pick the foods you actually have; a weighted least-squares solve returns grams. **Same input, same output, every time.** Lock a food and it stays put; portions can exclude meat at breakfast |
+| **Balancer** | Pick the foods you actually have; a weighted least-squares solve returns grams. **Same input, same output, every time.** Lock a food and it stays put; long-press a food to reorder the list or drag it to the top of the page to remove it; portions can exclude meat at breakfast |
+| **Custom food** | Lives right under Quick log — enter macros per 100 g. **Add it once and it works everywhere**: quick log, balancing and the daily quota |
 | **Method library** | 19 goal + split + prescription bundles, sorted by your current goal and marked ★; apply the whole thing or just the split |
 | **Templates** | Save once, reuse for three months, with a review reminder |
 | **Plugins** | Five built-in toggles (muscle tags on every exercise are **on by default**) and a tiny API to write your own |
 | **English / 中文** | One-tap language switch in the top bar; the choice is remembered |
+| **Font size** | The “Aa” button switches between 100 / 110 / 120 / 130%, default 110%. The whole layout scales up together — type, line height and spacing — so text never spills out of its card |
 
 ## Quick start
 

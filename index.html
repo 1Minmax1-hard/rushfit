@@ -62,7 +62,9 @@
 }
 
 *{box-sizing:border-box}
-html,body{height:100%}
+html,body{height:100%;touch-action:manipulation}
+/* touch-action:manipulation = 允许滚动和双指缩放，但禁掉双击放大；子元素若需要更严格的
+   touch-action（.ex-shell 的 pan-y、拖拽手柄的 none）会自行覆盖，不受影响 */
 body{
   margin:0;background:var(--bg);color:var(--ink);
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
@@ -679,8 +681,9 @@ pre.code .s{color:#9ad9b6}
   .tb-left{grid-area:title;min-width:0}
   .tb-right{display:contents}
   .lang-btn{grid-area:lang}
-  .goal-seg{grid-area:goals;min-width:0;flex-wrap:wrap;justify-content:flex-start}
-  .goal-seg button{padding:4px 8px;font-size:11.5px}
+  .goal-seg{grid-area:goals;min-width:0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;justify-content:flex-start}
+  .goal-seg::-webkit-scrollbar{display:none}
+  .goal-seg button{flex:none;padding:4px 8px;font-size:11.5px}
   .wk-label{min-width:auto;font-size:12.5px}
 
   /* 训练动作卡片 */
@@ -818,6 +821,37 @@ body.ex-dragging .ex-shell:not(.dragging){opacity:.72}
   .tb-sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;display:block}
   .view{padding-bottom:calc(104px + env(safe-area-inset-bottom,0px))}
   .fs-btn,.lang-btn{padding:5px 8px}
+}
+
+/* ---------- 窄屏：今日摄入表改成两行式 ----------
+   四列在 390 px 下会把「营养素」挤压到 47–64 px，英文只能在一个词中间硬断
+   （Prot/ien、Diet/ary fibe/r）。改成：
+     第一行 名称 + 已吃/应吃    第二行 进度条 + 差额
+   名称独占整行宽度，字号放到 130% 也有 140 px 以上，不会拆词。 */
+@media (max-width:560px){
+  .macro-table,.macro-table thead,.macro-table tbody,.macro-table tr,.macro-table th,.macro-table td{display:block}
+  .macro-table tr{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-areas:"name eat" "bar gap";
+    align-items:center;column-gap:12px;row-gap:7px;
+    padding:11px 0;border-top:1px solid var(--line-2);
+  }
+  .macro-table tr:first-child{border-top:0}
+  .macro-table thead{display:none}          /* 两行式结构自明，省一行高度 */
+  .macro-table th,.macro-table td{padding:0;border:0}
+  .macro-table td.m-name{grid-area:name}
+  .macro-table td.m-eat{grid-area:eat;justify-self:end}
+  .macro-table td.m-bar{grid-area:bar;width:auto;padding:0}
+  .macro-table td.m-gap{grid-area:gap;justify-self:end;text-align:right}
+
+  /* 窄屏 + 大字号：卡片标题右侧那句提示太长会把标题挤成两行，让它自己占一行 */
+  .card-hd{flex-wrap:wrap;row-gap:1px}
+  .card-hd .hint{flex:1 1 100%}
+
+  .m-name{width:auto;overflow-wrap:normal;word-break:keep-all}
+  .m-gap{width:auto}
+  .m-eat{white-space:nowrap}
 }
 </style>
 </head>
@@ -1258,6 +1292,18 @@ const SEG_RANGE = {
 /* 词典以中文原文为键：渲染后统一替换，避免在 700 处调用点逐个包 t()。
    替换按长度倒序，长词优先，所以「组间」不会先被「组」吃掉。 */
 var EN = {
+  "加一条就能出分。": "Add one entry to get a score.",
+  "1 g 盐 ≈ 400 mg 钠 · 1 汤匙生抽 ≈ 1000 mg": "1 g salt ≈ 400 mg sodium · 1 tbsp soy sauce ≈ 1000 mg",
+  "全局通用": "Global",
+  "还没有记录。": "Nothing logged yet.",
+  "已经到上限了，换一种同类食材就行。": "already at the cap — swap in another food from the same group.",
+  "参与配平的食材": "Foods in the pool",
+  "拖动排序 · 拖到顶部删除": "drag to reorder · drag to the top to delete",
+  "手表模式已含运动，别重复记。": "Watch mode already counts exercise — do not log it twice.",
+  "已排除「": "Excluded “",
+  "」类": "”",
+  "还没有保存的模板。": "No saved templates yet.",
+  "先打开下面的食材开关。": "Turn on some foods below.",
   "」 · 填克数点「加入」就能记到今天": "\" · enter grams and tap Add to log it today",
   "已添加「": "Added \"",
   "参与配平的食材 · 拖动排序，拖到页面顶端删除": "Foods in the pool · drag to reorder, drag to the top of the page to delete",
@@ -1386,23 +1432,46 @@ function applyShellLang(){
 var FS_STEPS = [1, 1.1, 1.2, 1.3];
 var CSS_BASE = null;
 
+/* 字号缩放 = 整体等比放大：不只是 font-size，内边距、行高、圆角、卡片高度一起放大，
+   所以不会出现「字放大了、盒子没变大」把文字裁掉的情况。
+   只放大长度属性里的 px 值，% / em / vh 一律不动；@media 的断点条件也不动
+   （否则 130% 时布局会误判成手机/桌面）。 */
+var FS_LEN_PROPS = [
+  'padding','padding-top','padding-right','padding-bottom','padding-left',
+  'margin','margin-top','margin-right','margin-bottom','margin-left',
+  'gap','row-gap','column-gap',
+  'font-size','line-height','letter-spacing','text-indent',
+  'width','min-width','max-width','height','min-height','max-height',
+  'top','right','bottom','left','flex-basis','border-radius',
+  'grid-template-columns','grid-template-rows'
+].join('|');
+
+function scaleCss(base, k){
+  var conds = [];
+  var txt = base.replace(/@media([^{]*)\{/g, function (m, cond) {
+    conds.push(cond);
+    return '@media__C' + (conds.length - 1) + '__{';
+  });
+  var re = new RegExp('(\\b(?:' + FS_LEN_PROPS + ')\\s*:\\s*)([^;{}]+)', 'g');
+  txt = txt.replace(re, function (_, head, val) {
+    return head + val.replace(/(-?[\d.]+)px/g, function (__, n) {
+      return (Math.round(parseFloat(n) * k * 10) / 10) + 'px';
+    });
+  });
+  return txt.replace(/@media__C(\d+)__\{/g, function (_, i) { return '@media' + conds[+i] + '{'; });
+}
+
 function applyFs(){
   var st = document.getElementById('appcss');
   if (!st) return;
   if (CSS_BASE === null) CSS_BASE = st.textContent;
   var k = (typeof S.fs === 'number' && S.fs >= 1) ? S.fs : 1;
-  if (Math.abs(k - 1) < 0.001){
-    if (st.textContent !== CSS_BASE) st.textContent = CSS_BASE;
-    return;
-  }
-  st.textContent = CSS_BASE.replace(/font-size:\s*([\d.]+)px/g, function (_, v) {
-    var out = Math.round(parseFloat(v) * k * 10) / 10;
-    return 'font-size:' + out + 'px';
-  });
+  st.textContent = (Math.abs(k - 1) < 0.001) ? CSS_BASE : scaleCss(CSS_BASE, k);
 }
 
 function setFs(k){
   S.fs = k;
+  S.fsTouched = true;          /* 手动调过就不再被默认值覆盖 */
   save(); applyFs(); syncFsBtn();
   toast('字号 ' + Math.round(k * 100) + '%');
 }
@@ -1434,7 +1503,7 @@ function defaultState(){
     activity: 1.5,            // 旧版单一活动系数，仅作迁移来源
     actNeat: 1.25,            // 日常活动系数（不含训练）：久坐 1.15 / 轻度 1.25 / 中度 1.4 / 体力 1.55
     actSess: 3,               // 每周训练次数，单独参与 TDEE 估算
-    fs: 1,
+    fs: 1.1,                 // 字号缩放默认 110%
     actMode: 'formula',      // formula | watch | split
     carbMode: 'split',       // split | flat | high
     watchTotal: 0,           // 手表全天总消耗 kcal
@@ -1457,7 +1526,6 @@ function defaultState(){
     excludePatterns: [],
     /* exParts（动作部位注释）默认开启：新用户一进训练页就能看到每个动作练哪儿 */
     plugs: { restTimer:false, water:false, volTrend:false, muscleVolume:false, exParts:true },
-    fs: 1,                   // 字号缩放 1 / 1.1 / 1.2 / 1.3
     methodId: null,
     ui: { view:'week', calMode:'week', weekOffset:0, monthOffset:0, day: dayIdxOf(iso(t)),
           nutDate: iso(t), meals:3, meat:'chicken', carb:'rice', meatBf:true,
@@ -1519,7 +1587,10 @@ if (!S || !S.profile) S = defaultState();
     s.profile.bfGoal = (s.profile.sex === 'female') ? 24 : 17;
   }
   if (!s.carbMode) s.carbMode = 'split';
-  if (typeof s.fs !== 'number' || s.fs < 1 || s.fs > 1.3) s.fs = 1;
+  /* 字号默认 110%：老存档里从没手动调过（没有 fsTouched）就升到 110%，
+     手动调过 100% 的保持 100%，不再被动过 */
+  if (s.fsTouched !== true && (s.fs == null || Math.abs(s.fs - 1) < 0.001)) s.fs = 1.1;
+  if (typeof s.fs !== 'number' || s.fs < 1 || s.fs > 1.3) s.fs = 1.1;
   if (!s.variants) s.variants = {};
   if (!s.cardio) s.cardio = {};
   if (!s.variants.quark) s.variants.quark = 'quark_speise';
@@ -2648,7 +2719,6 @@ function setupPanel(){
       return '<button class="btn sm' + (on?' primary':'') + '" data-action="toggleDay" data-i="' + i + '">' + c + '</button>';
     }).join('') + '</div></div>';
   h2 += '</div>';
-  h2 += '<p class="muted" style="font-size:11.5px;margin-top:10px">改完立刻生效。训练日按顺序套用当前分化，休息日自动切换低碳/高脂的饮食目标。</p>';
   h2 += '</div></div>';
   return h2;
 }
@@ -2666,7 +2736,7 @@ function capacityHtml(wkKey){
   var html = '<div class="card cap"><div class="card-bd">';
   html += '<div class="cap-head"><div class="cap-hl">' +
           '<h3 class="cap-t">本周容量</h3>' +
-          '<span class="src">' + GOALS[S.goal].label + ' · 每肌群周组数 · 复合动作的间接刺激按 0.5 组计</span></div>';
+          '<span class="src">' + GOALS[S.goal].label + ' · 每肌群周组数</span></div>';
   html += '<div class="cal-toggle cap-seg">' +
     [['bar','横条'],['chip','胶囊'],['off','仅详情']].map(function(x){
       return '<button data-action="capMode" data-mode="' + x[0] + '" class="' + (mode===x[0]?'on':'') + '">' + x[1] + '</button>';
@@ -2713,7 +2783,7 @@ function capacityHtml(wkKey){
   if (lows.length){
     html += '<button class="btn sm primary" data-action="fillVolume">按目标补齐组数</button>';
   }
-  html += '<span class="src">依据：' + h(pr.why) + '</span></div>';
+  html += '</div>';
   html += '</div></div>';
   return html;
 }
@@ -2764,7 +2834,6 @@ function pickSessionSheet(){
          '<span class="sess-n">空白训练日</span>' +
          '<span class="sess-m">自己加动作，适合想试新计划</span></button></div>';
 
-  out += '<div class="sheet-foot"><span class="src">选完会按这节课的动作清单生成，已记录的勾选会保留在旧记录里。</span></div>';
   out += '</div></div>';
   return out;
 }
@@ -2813,7 +2882,6 @@ function monthGrid(){
 
   var h2 = '<div class="card"><div class="card-bd">';
   h2 += '<div class="month-head">';
-  h2 += '<span class="src">点任意一天可跳到那一周 · 色条是当天完成度</span>';
   h2 += '</div>';
 
   h2 += '<div class="cal-dow">' + WEEK_CN.map(function(c){ return '<span>周' + c + '</span>'; }).join('') + '</div>';
@@ -2867,8 +2935,7 @@ function cardioBlock(dateKey){
   var first = CARDIO_TYPES[0].id;
 
   var out = '<div class="cardio-box">';
-  out += '<div class="cardio-hd"><b>有氧运动</b>' +
-         '<span class="src">时长和消耗会直接加到当天的热量目标</span></div>';
+  out += '<div class="cardio-hd"><b>有氧运动</b></div>';
 
   out += '<div class="cardio-form">';
   out += '<select class="input" id="cdType" aria-label="有氧类型">' +
@@ -2905,12 +2972,10 @@ function cardioBlock(dateKey){
            '<span>合计 <b class="num">' + tM + '</b> min · <b class="num">' + tK + '</b> kcal</span>' +
            '<span style="color:var(--accent-2);font-weight:650">已计入今日目标 +' + tK + ' kcal</span>' +
            '</div>';
-    out += '<p class="src" style="margin-top:6px">器械面板上的消耗普遍偏高 20–30%，想保守一点就按八折填。</p>';
   }
 
   if (S.actMode === 'watch'){
-    out += '<p class="src" style="margin-top:6px">你现在是「手表全天总消耗」模式，手表已经把运动算进去了，' +
-           '再记有氧会重复计算。要么改用「公式估算」，要么这里别记。</p>';
+    out += '<p class="src" style="margin-top:6px">手表模式已含运动，别重复记。</p>';
   }
   out += '</div>';
   return out;
@@ -2935,8 +3000,7 @@ function dayPanel(wkKey, dateKey, dp){
     var log = ensureLog(dateKey);
     var pr = dayProgress(dateKey);
     var planSets = dp.exercises.reduce(function(a,e){ return a + e.sets; }, 0);
-    html += '<p class="dp-sub" style="margin-top:6px">计划 ' + planSets + ' 组 · 已完成 ' + pr.done + ' 组（' + pr.pct + '%）· ' +
-            '每个动作先给 1 组，练几组记几组 · <b>长按拖动排序，左滑显示替换/删除</b></p>';
+    html += '<p class="dp-sub" style="margin-top:6px">计划 ' + planSets + ' 组 · 已完成 ' + pr.done + ' 组（' + pr.pct + '%）</p>';
     if (S.ui.capMode === 'off' && S.plugs.muscleVolume){
       var dmx = dayMuscleMix(dateKey);
       var chipsD = MUSCLE_GROUPS.filter(function(g){ return dmx[g.id].d > 0; }).map(function(g){
@@ -2999,14 +3063,13 @@ function dayPanel(wkKey, dateKey, dp){
     html += '<select class="input" id="addExSel" style="max-width:220px">' +
       EX_LIB.map(function (n) { return '<option>' + n + '</option>'; }).join('') + '</select>';
     html += '<button class="btn sm" data-action="addEx" data-date="' + dateKey + '">+ 添加动作</button>';
-    html += '<span class="muted" style="font-size:11.5px">重量按上次自动带入，次数取区间中值，组数不够就点「+ 组」</span>';
     html += '</div>';
 
     html += cardioBlock(dateKey);
 
     html += '<div class="slot" data-slot="workout"></div>';
   } else {
-    html += '<p class="dp-sub" style="margin-top:8px">今天不做力量训练。目标：8000 步以上、蛋白质不降、碳水降一档、睡前 7.5 小时。</p>';
+    html += '<p class="dp-sub" style="margin-top:8px">今天不做力量训练。</p>';
     var t = targets(dateKey);
     html += '<div class="port-tiles" style="margin-top:12px">' +
       '<div class="port"><div class="v num">' + t.kcal + '</div><div class="k">kcal 目标</div></div>' +
@@ -3113,7 +3176,7 @@ function scoreCardHtml(dk){
     out += '<div class="score-card">' +
       '<div class="score-ring">' + scoreRingHtml(0) + '<div class="score-num"><b style="color:var(--ink-3)">—</b><span>/ 100</span></div></div>' +
       '<div class="score-side"><div class="score-lv">今天还没有记录</div>' +
-      '<div class="score-note">用「快速记录」加一条，或直接在下面表格里填数字，这里会按蛋白 / 热量 / 碳水 / 脂肪 / 纤维 / 钠六项算分。</div></div>' +
+      '<div class="score-note">加一条就能出分。</div></div>' +
       '</div></div></div>';
     return out;
   }
@@ -3123,7 +3186,6 @@ function scoreCardHtml(dk){
     '<div class="score-cheer">' + cheerFor(sc.score, dk) + '</div>' +
     '<div class="score-note">' + sc.note + '</div>' +
     '</div></div></div>';
-  out += '<p class="src" style="margin-top:-4px;padding:0 2px">分数 = 蛋白 / 热量 / 碳水 / 脂肪 / 纤维 / 钠六项加权；吃少和吃多都扣分，钠需记录才计分。</p>';
   return out;
 }
 
@@ -3134,7 +3196,7 @@ function mealsLogHtml(dk){
   var out = '<div class="card" style="margin-top:14px"><div class="card-hd"><h3>今天吃过什么</h3>' +
             '<span class="hint">' + list.length + ' 条 · 合计 <b class="num">' + Math.round(sumK) + '</b> kcal</span></div><div class="card-bd">';
   if (!list.length){
-    out += '<div class="empty-tip">还没有记录。用上面的「快速记录」选食物 + 克数点「加入」，这里会按时间顺序列出来，方便回看今天到底吃了什么。</div>';
+    out += '<div class="empty-tip">还没有记录。</div>';
   } else {
     out += '<div class="meal-list">';
     list.forEach(function(x, i){
@@ -3150,7 +3212,6 @@ function mealsLogHtml(dk){
       '</div>';
     });
     out += '</div>';
-    out += '<p class="src" style="margin-top:8px">点 × 会删掉这条并从「今日摄入」里扣回去。如果你又手动改过上面的数字，以表格为准。</p>';
   }
   out += '</div></div>';
   return out;
@@ -3214,7 +3275,7 @@ function viewNutrition(){
     html += '</tr>';
   });
   html += '</tbody></table>';
-  html += '<p class="src" style="margin-top:10px;line-height:1.7">钠：快速记录会按食材自身含量自动累加（每 100 g 典型值）。<b>盐、酱油、酱料不在食物库里</b> —— 在「钠」那行把调味料补进去：1 g 盐 ≈ 400 mg 钠，1 汤匙生抽 ≈ 1000 mg。直接改数字是覆盖，不是相加。</p>';
+  html += '<p class="src" style="margin-top:10px">1 g 盐 ≈ 400 mg 钠 · 1 汤匙生抽 ≈ 1000 mg</p>';
 
   html += '<div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;align-items:flex-end">';
   html += '<div class="field" style="flex:1;min-width:170px"><label>快速记录（选食物 + 克数）</label>' +
@@ -3227,7 +3288,7 @@ function viewNutrition(){
   /* 自定义食材：全局通用（快速记录 / 配平 / 每日配额都用），入口就放在快速记录下面 */
   html += '<div class="qf-custom">' +
           '<button class="btn primary" data-action="toggleAddFood">' + (S.ui.addFood ? '收起' : '+ 自定义食材') + '</button>' +
-          '<span class="src">全局通用：快速记录、配平、每日配额都用它，加一次以后一直在</span>' +
+          '<span class="src">全局通用</span>' +
           '</div>';
   if (S.ui.addFood) html += addFoodHtml();
 
@@ -3249,7 +3310,7 @@ function viewNutrition(){
           '脂肪 <b class="num">' + Math.round(gN.f) + ' g</b></div>';
 
   if (!bal.ok && bal.reason === 'empty'){
-    html += '<div class="empty-tip">现在没有选中任何食材，所以算不出方案。把下面食材的开关打开，或者用左栏「+ 自定义食材」加一个你自己常吃的。</div>';
+    html += '<div class="empty-tip">先打开下面的食材开关。</div>';
   } else {
     html += '<div class="bal-list">';
     bal.items.forEach(function (it) {
@@ -3266,11 +3327,10 @@ function viewNutrition(){
     html += '</div>';
     html += '<div class="bal-actions">' +
             '<button class="btn primary" data-action="doBalance">自动配平</button>' +
-            '<button class="btn" data-action="clearBalance">全部清零</button>' +
-            '<span class="src">改了克数就会自动锁定；点锁图标解锁</span></div>';
+            '<button class="btn" data-action="clearBalance">全部清零</button></div>';
     html += balanceResultHtml(bal);
     if (bal.missing && bal.missing.length){
-      html += '<div class="miss-line"><b>还差一点：</b>已选食材加到各自份量上限也补不齐，加一种同类（不同食物，比如燕麦或面条）通常就够了。' +
+      html += '<div class="miss-line"><b>还差一点：</b>已经到上限了，换一种同类食材就行。' +
               '<span class="miss-btns">' +
               bal.missing.map(function(m){ return '<button class="btn sm" data-action="addCat" data-cat="' + m.cat + '">+ 加' + m.label + '</button>'; }).join('') +
               '</span></div>';
@@ -3308,10 +3368,11 @@ function viewNutrition(){
       return '<option value="'+g.id+'"'+(S.ui.carb===g.id?' selected':'')+'>'+h(g.name)+'</option>';
     }).join('') + '</select></div>';
   html += '</div>';
-  html += '<p class="src" style="margin-top:10px">今天碳水 <b>' + t.c + ' g ≈ ' + t.carbPerKg + ' g/kg</b>，脂肪 ' + t.fat + ' g。' +
-          (pp.meatBf ? '' : '<br><b>早餐不吃肉</b>：蛋白质仍然按全天算，肉类只分到剩下 ' + pp.meatMeals + ' 餐，所以每餐是 ' + pp.meat + ' g 而不是 ' + Math.max(30, Math.round((t.p*0.70/(pp.meals||3)) / (Math.max(pp.meatFood.p,1)/100) / 10) * 10) + ' g；早上的蛋白可以由鸡蛋 / 牛奶 / 酸奶补。') +
-          '「全周高碳」会把脂肪压到 0.7 g/kg，适合上课上班时间不固定、没法在休息日刻意控碳的人；代价是脂肪偏低，坚果和油要按量吃。<br>' +
-          '算法假设：70% 蛋白来自肉类、55% 碳水来自主食、40% 脂肪来自烹调油，其余由乳制品/蛋/蔬菜/水果提供。称重口径：肉为生重，米饭面条为熟重。</p>';
+  html += '<p class="src" style="margin-top:10px">' + (S.lang === 'en'
+    ? 'Carbs <b>' + t.c + ' g ≈ ' + t.carbPerKg + ' g/kg</b> · Fat ' + t.fat + ' g' +
+      (pp.meatBf ? '' : ' · no meat at breakfast, meat splits over ' + pp.meatMeals + ' meals')
+    : '碳水 <b>' + t.c + ' g ≈ ' + t.carbPerKg + ' g/kg</b> · 脂肪 ' + t.fat + ' g' +
+      (pp.meatBf ? '' : ' · 早餐不吃肉，肉类分到 ' + pp.meatMeals + ' 餐')) + '</p>';
   html += '</div></div>';
 
   html += '</div></div>';
@@ -3344,8 +3405,7 @@ function chipsHtml(){
   var reg = foodRegistry().filter(function (g) { return hid.indexOf(g.id) < 0; });
   var edit = !!S.ui.chipEdit;
 
-  var out = '<div class="chips-head"><span class="src">' +
-            (edit ? '参与配平的食材 · 拖动排序，拖到页面顶端删除' : '参与配平的食材（点一下开关）') + '</span>' +
+  var out = '<div class="chips-head"><span class="src">参与配平的食材</span>' +
             '<button class="btn sm' + (edit ? '' : ' dashed') + '" data-action="toggleChipEdit">' +
             (edit ? '完成编辑' : '排序 / 删除') + '</button></div>';
 
@@ -3360,9 +3420,7 @@ function chipsHtml(){
   });
   out += '</div>';
 
-  out += '<div class="chip-tip">' + (edit
-    ? '按住任意食材拖动排序；拖到页面顶端松手即删除——自定义食材会真的删掉，内置食材只是从这里隐藏（不会影响快速记录），在下面可以随时恢复。'
-    : '长按食材进入编辑：拖动排序，拖到页面顶端删除。') + '</div>';
+  if (edit) out += '<div class="chip-tip">拖动排序 · 拖到顶部删除</div>';
 
   if (hid.length){
     out += '<div class="chip-bar"><span class="chip-hidden">已隐藏 ' + hid.length + ' 种食材</span>' +
@@ -3455,8 +3513,8 @@ function viewBody(){
       }).join('') +
       '</select></div>';
     html += '<p class="src full" style="margin:-2px 0 2px">' + (ENm
-      ? 'Daily average ≈ <b>' + Math.round(b.tdeeAvg) + ' kcal</b> = BMR ' + Math.round(b.bmr) + ' × (daily ' + b.actNeat + ' + training ' + b.actAdd.toFixed(2) + '), then split into training days (+5%) and rest days (lowered by the same amount). Daily activity counts only walking and standing outside training; each session is worth ≈ BMR × 8%.'
-      : '日平均 ≈ <b>' + Math.round(b.tdeeAvg) + ' kcal</b> ＝ BMR ' + Math.round(b.bmr) + ' ×（日常 ' + b.actNeat + ' ＋ 训练 ' + b.actAdd.toFixed(2) + '），再拆成训练日 +5%、休息日等量下调。<b>日常活动只算不练时的走动和站立</b>，训练另按每次 BMR×8% 折算。') + '</p>';
+      ? 'Daily average <b>' + Math.round(b.tdeeAvg) + ' kcal</b>'
+      : '日平均 <b>' + Math.round(b.tdeeAvg) + ' kcal</b>') + '</p>';
     if ((b.planSess || 0) !== b.actSess){
       html += '<p class="src full" style="margin:-2px 0 2px;color:#8a4a08">' + (ENm
         ? 'Your plan has <b>' + (b.planSess || 0) + '</b> training day(s) but you set <b>' + b.actSess + '</b> session(s) — the total uses this number, the day-by-day split still follows the plan. Keep them equal if you can.'
@@ -3465,7 +3523,6 @@ function viewBody(){
   } else if (S.actMode === 'watch'){
     html += '<div class="field full"><label>手表：近 7 天平均「总消耗」kcal</label>' +
       '<input class="input num" type="number" step="10" data-field="watchTotal" value="' + (S.watchTotal || '') + '" placeholder="例如 2450"></div>';
-    html += '<p class="src full" style="margin:-2px 0 2px">小米手表里找「消耗」或「活动+静息」的合计值，别只填运动那一项。<b>力量训练的热量估算误差常在 20–40%</b>，所以它只是身体模型的一个输入，不是消耗多少就吃回多少。<br>填周均值即可：系统会把训练日上调约 5%，休息日按「一周总量守恒」下调，所以<b>练的那天和不练的那天热量不一样</b>。</p>';
   } else {
     html += '<div class="field full"><label>手表：今天运动消耗 kcal</label>' +
       '<input class="input num" type="number" step="10" data-field="exKcal" value="' + (S.exKcal || '') + '" placeholder="训练记录里的活动热量"></div>';
@@ -3473,7 +3530,6 @@ function viewBody(){
       [[1.15,'久坐为主（教室/图书馆/电脑前）'],[1.25,'日常走动多（校区通勤、常站着）'],[1.4,'体力工作 / 每天 1 万步以上']]
         .map(function (a) { return '<option value="' + a[0] + '"' + (S.neat==a[0]?' selected':'') + '>' + a[0] + ' · ' + a[1] + '</option>'; }).join('') +
       '</select></div>';
-    html += '<p class="src full" style="margin:-2px 0 2px">训练日 = 静息 × 活动系数 + 运动消耗；<b>休息日只算前一半</b>，所以两天天然不同。运动消耗填 0 的话两天会一样，建议填 200–300（45–60 分钟力量训练）。</p>';
   }
   html += '</div>';
 
@@ -3491,7 +3547,7 @@ function viewBody(){
   html += '<div class="src" style="margin-bottom:6px">今晨空腹体重记录</div>';
   html += '<div class="qadd"><input class="input num" type="number" step="0.1" id="wInput" placeholder="' + r1(b.weight) + '"><span class="muted" style="font-size:12px">kg</span><button class="btn sm" data-action="logWeight">记录</button></div>';
   var srcTxt = src.count > 1 ? src.label + ' ' + src.w + ' kg（' + src.count + ' 次记录取均值）' : src.label + ' ' + src.w + ' kg';
-  html += '<p class="src" style="margin-top:8px">体重来源：<b>' + srcTxt + '</b>。身体模型优先用上周空腹体重的平均值，避免单日水分波动误导。</p>';
+  html += '<p class="src" style="margin-top:8px">体重来源：<b>' + srcTxt + '</b></p>';
   html += '</div>';
 
   html += '</div></div>';
@@ -3524,9 +3580,8 @@ function viewBody(){
   html += '<p class="src" style="margin-top:8px">今天（' + (tt.tr ? '训练日' : '休息日') + '）蛋白 ' + tt.p + ' g · 脂肪 ' + tt.fat +
           ' g · 碳水 ' + tt.c + ' g　|　蛋白 ' + (tt.p/b.weight).toFixed(1) + ' g/kg · BMI ' + r1(b.bmi) + '</p>';
   if (!b.complete){
-    html += '<div class="warn-line">未填：' + b.missing.join('、') + '。缺数据不影响使用——体重在就能算，其余按默认值估算，营养模块照常工作。</div>';
+    html += '<div class="warn-line">未填：' + b.missing.join('、') + '</div>';
   }
-  html += '<p class="src" style="margin-top:10px">FFMI 按瘦体重计算（含身高校正）；体脂秤上的 17.5 用的是另一套公式，两者不用互相对照，看自己的趋势即可。</p>';
   html += '</div></div>';
 
   /* 策略说明 */
@@ -3545,8 +3600,6 @@ function viewBody(){
       '</div>';
   });
   html += '</div>';
-  html += '<p class="src" style="margin-top:8px">脂肪一列是「训练日 / 休息日」；按体重换算，单位 g/kg。</p>';
-  html += '<p class="src" style="margin-top:10px">蛋白区间依据 ISSN 立场声明（1.4–2.0 g/kg 维持；减脂期 2.0–2.2 g/kg 保瘦体重）。1 kg 脂肪 ≈ 7700 kcal，所以每周 0.3–0.5 kg 是可持续速度。</p>';
   html += '</div></div>';
 
   html += '</div></div>';
@@ -3638,9 +3691,6 @@ function rings(b, p){
   h += '<div class="ring-item"><div class="ring" style="--p:' + mmPct.toFixed(0) + '"><span class="rv num">' + (mm || '—') + '</span></div>' +
        '<div class="rl">肌肉量 kg<br><b>瘦体重 ' + (b.lbm != null ? r1(b.lbm) + ' kg' : '—') + '</b><br><span class="src">' +
        (p.water ? '水分 ' + p.water + '%' : '未填体水分') + '</span></div></div>';
-  h += '<div style="font-size:11.5px;color:var(--ink-3);line-height:1.6">' +
-       absNote(b, bf) +
-       '</div>';
   return h;
 }
 
@@ -3673,7 +3723,6 @@ function methodCard(m, starred){
          (m.carb === 'high' ? '<span class="fact-carb">碳水 全周高碳</span>' : '') +
          '</div>';
   out += '<p class="mth-desc">' + h(m.desc) + '</p>';
-  out += '<p class="mth-ev">' + h(m.ev) + '</p>';
   out += '<div class="mth-foot"><span class="src">有氧：' + h(pr.cardio) + '</span>' +
          '<span class="mth-btns">' +
          '<button class="btn sm" data-action="applySplit" data-id="' + m.id + '" title="只改分化与训练日，不动目标和吃法">只换课表</button>' +
@@ -3698,12 +3747,12 @@ function viewTemplates(){
   html += '</div>';
   html += '<div class="mth-more"><button class="btn sm" data-action="tplExpand">' +
           (open ? '收起' : '展开全部 ' + list.length + ' 套') + '</button>' +
-          '<span class="src">套用会同时切换目标策略、分化方式、训练日，并清空本周手动改动</span></div>';
+          '</div>';
   html += '</div></div>';
 
   html += '<div class="card" style="margin-top:16px"><div class="card-hd"><h3>我的模板</h3><span class="hint">' + S.templates.length + ' 个 · 默认三个月需要复查一次</span></div><div class="card-bd">';
   if (!S.templates.length){
-    html += '<div class="empty">还没有保存的模板。在「周计划」里点「存为模板」，就能把这一周的动作、组数、起始重量存下来复用。默认有效期三个月，到期会提醒你复查。</div>';
+    html += '<div class="empty">还没有保存的模板。</div>';
   } else {
     html += '<div class="tpl-grid">';
     S.templates.forEach(function (t, i) {
@@ -3758,7 +3807,6 @@ function viewPlugins(){
       return '<button data-action="setFs" data-k="' + x[0] + '" class="' +
              (Math.abs((S.fs || 1) - x[0]) < 0.001 ? 'on' : '') + '">' + x[1] + '</button>';
     }).join('') + '</div></div>';
-  html += '<p class="src" style="margin-top:10px">调大后自动换行，不会撑破卡片。手机输入框固定 16px，避免一点就放大。</p>';
   html += '</div></div>';
 
   html += '<div class="card" style="margin-top:16px"><div class="card-hd"><h3>自己写一个</h3><span class="hint">插件 = 一个对象 + 一个 render</span></div><div class="card-bd">';
@@ -4570,7 +4618,7 @@ function replaceSheet(){
     out += '</div></div>';
   } else if (blocked){
     out += '<div class="sheet-sec"><div class="sheet-t">同类动作</div>' +
-           '<div class="src">你已经设置了不推荐「' + meta.tag + '」类，所以这里不显示。</div></div>';
+           '<div class="src">已排除「' + meta.tag + '」类</div></div>';
   }
 
   if (sameMus.length){
@@ -4986,6 +5034,43 @@ function replaceSheet(){
   });
 })();
 
+/* ================= 禁用双击放大 ================= */
+/* CSS 的 touch-action:manipulation 已经能挡住大部分浏览器；iOS Safari（尤其网页版）对
+   它支持不完整，所以再在 touchend 上兜一层：300 ms 内同一位置连点两次就拦掉缩放。
+   例外：连点同一个按钮 / 输入框时不拦（那是故意操作，或双击选词），避免把连点吃掉。 */
+(function(){
+  var lastT = 0, lastX = 0, lastY = 0, lastEl = null;
+  var TAP_SEL = 'button,a,label,input,select,textarea,[data-action],[contenteditable="true"]';
+
+  function isTapTarget(node){
+    if (!node || node.nodeType !== 1) return false;
+    if (node.closest(TAP_SEL)) return true;
+    var tag = node.tagName;
+    return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+  }
+
+  document.addEventListener('touchend', function (e){
+    if (!e.cancelable) return;                    /* 已被别处 preventDefault */
+    if (e.touches && e.touches.length) return;    /* 还有手指按着 → 可能是在缩放，不管 */
+    var t = e.changedTouches && e.changedTouches[0];
+    if (!t) return;
+    /* 双指及以上（真正的捏合缩放）不处理 */
+    if (e.changedTouches.length > 1) return;
+
+    var now = Date.now();
+    var sameEl = (lastEl === e.target);
+    var near = Math.abs(t.clientX - lastX) < 26 && Math.abs(t.clientY - lastY) < 26;
+    var dbl = (now - lastT) < 300 && near;
+
+    if (dbl && !(sameEl && isTapTarget(e.target))){
+      e.preventDefault();                          /* 吃掉这次 tap → 浏览器不缩放 */
+      lastT = 0;
+      return;
+    }
+    lastT = now; lastX = t.clientX; lastY = t.clientY; lastEl = e.target;
+  }, { passive: false });
+})();
+
 /* 导航 */
 document.addEventListener('click', function (e) {
   var b = e.target.closest('.nav-item');
@@ -4997,7 +5082,7 @@ document.addEventListener('click', function (e) {
 /* ================= 启动 ================= */
 function init(){
   if (!S.water) S.water = {};
-  if (typeof S.fs !== 'number' || S.fs < 1 || S.fs > 1.3) S.fs = 1;
+  if (typeof S.fs !== 'number' || S.fs < 1 || S.fs > 1.3) S.fs = 1.1;
   if (!S.ui.meals) S.ui.meals = 3;
   if (S.ui.meatBf == null) S.ui.meatBf = true;
   if (!S.mealsLog) S.mealsLog = {};
