@@ -1,7 +1,7 @@
 /* RushFit Service Worker：让「添加到主屏幕」后能离线打开
    策略：页面导航走网络优先（改版立刻生效），静态资源走缓存优先 + 后台更新；
    离线时导航回落到 index.html 缓存 */
-const CACHE = 'rushfit-v11';
+const CACHE = 'rushfit-v13';
 const ASSETS = [
   './',
   './index.html',
