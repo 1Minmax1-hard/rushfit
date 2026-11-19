@@ -914,7 +914,7 @@ body.ex-dragging .ex-shell:not(.dragging){opacity:.72}
   .macro-table td.m-bar{grid-area:bar;width:auto;padding:0}
   .macro-table td.m-gap{grid-area:gap;justify-self:end;text-align:right}
 
-  /* 手机上换成第一行的左右两个大按钮，点一下 ±1（钠 / 热量 ±5） */
+  /* 手机上换成第一行的左右两个大按钮，点一下 ±1（钠 / 热量也一样） */
   .step-v{display:none}
   .macro-table td.m-step-h{display:flex;grid-area:step;align-items:center;gap:6px}
   .macro-table td.m-step-h button{
@@ -3408,8 +3408,9 @@ function viewNutrition(){
     var gap = r.tg - r.v;
     var gapTxt = (gap >= 0 ? '−' : '+') + Math.abs(Math.round(gap));
     var cls = over ? 'gap-over' : 'gap-ok';
-    /* 钠和热量颗粒度 5，其余 1 —— 拖动、加减按钮都按这个走 */
+    /* 拖拽颗粒度：钠和热量 5，其余 1；加减按钮一律 1（点一下涨一格，钠和热量也一样） */
     var stp = (r.key === 'sodium' || r.key === 'kcal') ? 5 : 1;
+    var bst = 1;
     /* 热量没有独立字段，拖它等于改碳水；蛋白质+脂肪那部分分量动不了，所以下限是它俩的热量 */
     var minV = (r.key === 'kcal') ? Math.round(n.p * 4 + n.f * 9) : 0;
     var dAttrs = ' data-drag="' + r.key + '" data-tg="' + Math.round(r.tg) + '" data-min="' + minV + '"' +
@@ -3419,7 +3420,7 @@ function viewNutrition(){
     if (r.key === 'kcal'){
       html += '<td class="m-eat"><b class="num m-val">' + Math.round(r.v) + '</b> <span class="muted">/ ' + Math.round(r.tg) + ' ' + r.u + '</span></td>';
     } else {
-      html += '<td class="m-eat"><input class="m-in num" type="number" min="0" step="' + stp + '" data-nut="' + r.key + '" value="' + Math.round(r.v) + '">' +
+      html += '<td class="m-eat"><input class="m-in num" type="number" min="0" step="1" data-nut="' + r.key + '" value="' + Math.round(r.v) + '">' +
               ' <span class="muted">/ ' + Math.round(r.tg) + ' ' + r.u + '</span></td>';
     }
     html += '<td class="m-bar"><div class="mbar-in"><div class="bar" role="slider" aria-valuemin="' + minV + '" aria-valuemax="' + Math.round(r.tg) + '" aria-valuenow="' + Math.round(r.v) + '"' + dAttrs + '>' +
@@ -3427,13 +3428,13 @@ function viewNutrition(){
               '<span class="knob"></span>' +
               '<span class="bar-tip"></span></div>' +
             '<div class="step-v">' +
-              '<button type="button" data-action="nutStep" data-k="' + r.key + '" data-dir="1" title="+' + stp + '">' + ICO.up + '</button>' +
-              '<button type="button" data-action="nutStep" data-k="' + r.key + '" data-dir="-1" title="−' + stp + '">' + ICO.down + '</button>' +
+              '<button type="button" data-action="nutStep" data-k="' + r.key + '" data-dir="1" title="+' + bst + '">' + ICO.up + '</button>' +
+              '<button type="button" data-action="nutStep" data-k="' + r.key + '" data-dir="-1" title="−' + bst + '">' + ICO.down + '</button>' +
             '</div></div></td>';
     html += '<td class="m-gap ' + cls + '">' + (Math.abs(gap) < 0.5 ? '达成' : gapTxt) + '</td>';
     html += '<td class="m-step-h">' +
-              '<button type="button" data-action="nutStep" data-k="' + r.key + '" data-dir="-1" title="−' + stp + '">' + ICO.left + '</button>' +
-              '<button type="button" data-action="nutStep" data-k="' + r.key + '" data-dir="1" title="+' + stp + '">' + ICO.right + '</button>' +
+              '<button type="button" data-action="nutStep" data-k="' + r.key + '" data-dir="-1" title="−' + bst + '">' + ICO.left + '</button>' +
+              '<button type="button" data-action="nutStep" data-k="' + r.key + '" data-dir="1" title="+' + bst + '">' + ICO.right + '</button>' +
             '</td>';
     html += '</tr>';
   });
@@ -4878,13 +4879,14 @@ document.addEventListener('click', function (e) {
     save(); render(); toast('已清零'); return;
   }
 
-  /* 进度旁边的小加减：钠和热量一次 5，其余一次 1 */
+  /* 进度旁边的小加减：一律 ±1（钠和热量也是 ±1，5 那个颗粒度只属于拖拽）。
+     基准取「屏幕上那个整数」而不是原始小数，否则会先对齐到步长整倍，
+     115.4 点 +1 变成 116（只涨 0.6）。 */
   if (a === 'nutStep'){
     var kS = d.k, dirS = (+d.dir) >= 0 ? 1 : -1;
-    var stpS = (kS === 'sodium' || kS === 'kcal') ? 5 : 1;
     var nS = nutOf(S.ui.nutDate);
     var curS = (kS === 'kcal') ? nutKcal(nS) : (+nS[kS] || 0);
-    nutSetValue(kS, Math.max(0, Math.round((curS + dirS * stpS) / stpS) * stpS));
+    nutSetValue(kS, Math.max(0, Math.round(curS) + dirS));
     save(); render(); return;
   }
 
