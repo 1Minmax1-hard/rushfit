@@ -32,15 +32,15 @@ A **single-file, local-only** training and nutrition tool. Open it and it works 
 | **Editing what you ate** | Long-press a progress bar for 1 s — it thickens and buzzes — then drag left / right to set the value (sodium and calories move in steps of 5, everything else in 1). Prefer tapping? Use the little stepper beside the bar (up/down on desktop, two bigger left/right buttons in the first row on phones) — it always moves by 1. |
 | **Nutrition score** | A 0–100 score from protein, calories, carbs, fat, fibre and sodium — undereating and overeating both lose points. The ring gives the total, with a one-line nudge that changes by score band (stable within a day); sodium is left out of the weighting until logged |
 | **What you ate** | Every quick-add is kept and listed in order, so you can see the day's meals and remove a single entry (it is subtracted from the total) |
-| **Balancer** | Pick the foods you actually have; a weighted least-squares solve returns grams. **Same input, same output, every time.** Lock a food and it stays put; long-press a food to reorder the list or drag it to the top of the page to remove it; portions can exclude meat at breakfast |
+| **Balancer** | Pick the foods you actually have; a weighted least-squares solve returns grams. **Same input, same output, every time.** Tap the lock icon to pin a food; long-press a food to reorder the list or drag it to the top of the page to remove it |
 | **Custom food** | Lives right under Quick log — enter macros per 100 g. **Add it once and it works everywhere**: quick log, balancing and the daily quota |
 | **Edit a food** | Long-press any chip under the balancing foods to enter edit mode, tap one to select it, then press **Edit** in the corner and change the numbers — saving overwrites that entry (built-ins included, and beef · lean vs beef · fatty are edited separately). Tap anywhere blank to finish |
 | **Method library** | 19 goal + split + prescription bundles, sorted by your current goal and marked ★; apply the whole thing or just the split |
 | **Templates** | Save once, reuse for three months, with a review reminder |
-| **Plugins** | Five built-in toggles (muscle tags on every exercise are **on by default**) and a tiny API to write your own |
+| **Plugins** | Six built-in toggles (muscle tags **on by default**; Daily portions **off by default** — turn it on to work back from your target to per-meal amounts) and a tiny API to write your own |
 | **Import data** | Under Plugins → Write your own you can import body data and custom foods from a JSON file — it only writes those two, never your logs. The same card holds a **prompt for an AI**: paste it with a screenshot from your scale or health app and it returns a file you can import |
-| **English / 中文** | One-tap language switch in the top bar; the choice is remembered |
-| **Font size** | The “Aa” button switches between 100 / 110 / 120 / 130%, default 110%. The whole layout scales up together — type, line height and spacing — so text never spills out of its card |
+| **English / 中文** | Switch under Settings → Language; the choice is remembered |
+| **Font size** | Settings → Display switches between 100 / 110 / 120 / 130%, default 110%. The whole layout scales up together — type, line height and spacing — so text never spills out of its card |
 
 ## Quick start
 
@@ -100,7 +100,7 @@ Foods with the same name are skipped, out-of-range numbers (a 300 cm height, say
 
 ## Language
 
-The **EN / 中文** button in the top bar switches the interface; the choice is stored locally.
+Switch the interface under **Settings → Language**; the choice is stored locally.
 
 - Chinese is the complete original version
 - English covers the whole UI, terminology, exercise and food names, and every method's prescription and rationale; a few code-sample comments stay in Chinese
