@@ -1841,8 +1841,17 @@ function dayPlan(dateKey){
   var di = dayIdxOf(dateKey);
   var ov = S.plans[wk] || {};
   if (ov[di]) return ov[di];                 /* 手动改过的那一天优先 */
-  /* 套用课表 / 改训练日之前的日期：不拿当前模板回算，避免「过去被改写」 */
-  if (S.weekly.since && dateKey < S.weekly.since) return { type:'rest' };
+  /* 套用课表 / 改训练日之前的日期：不拿当前模板回算，避免「过去被改写」。
+     例外：那天手动记录过（有勾完成的组）——说明当时就是照这个 App 练的，继续按模板显示；
+     导入的历史记录不同，它们没有模板上下文，交给下面的「自由训练」分支。 */
+  if (S.weekly.since && dateKey < S.weekly.since){
+    var lg0 = S.logs && S.logs[dateKey];
+    if (!lg0 || !lg0.imported){
+      if (!loggedReal(dateKey)) return { type:'rest' };
+    } else {
+      return { type:'rest' };
+    }
+  }
   var plan = planForWeek(wk);
   return plan[di] || { type:'rest' };
 }
@@ -3254,7 +3263,7 @@ function weekGrid(){
     var dp = dayPlan(d);
     var pr = dayProgress(d);
     var lg = S.logs[d];
-    var hasLog = !!(lg && lg.items && lg.items.length);
+    var hasLog = loggedReal(d);
     var isTrain = dp.type === 'train';
     var trainLike = isTrain || hasLog;          /* 有记录的日子按训练日卡片显示 */
     var isSel = S.ui.day === i;
@@ -3403,6 +3412,19 @@ function cardioBlock(dateKey){
   return out;
 }
 
+/* 是否真的有练过：至少有一组勾了完成；导入的记录直接算。
+   只看 items 有没有内容会把「浏览时按旧模板补出来的空壳」误判成练过。 */
+function loggedReal(dateKey){
+  var lg = S.logs && S.logs[dateKey];
+  if (!lg || !lg.items || !lg.items.length) return false;
+  if (lg.imported) return true;
+  for (var i = 0; i < lg.items.length; i++){
+    var sets = lg.items[i].sets || [];
+    for (var j = 0; j < sets.length; j++) if (sets[j].done) return true;
+  }
+  return false;
+}
+
 function dayPanel(wkKey, dateKey, dp){
   var d = parse(dateKey);
   var html = '<div class="card day-panel"><div class="card-bd">';
@@ -3410,7 +3432,7 @@ function dayPanel(wkKey, dateKey, dp){
   html += '<h3>' + (d.getMonth()+1) + ' 月 ' + d.getDate() + ' 日 · 周' + WEEK_CN[dayIdxOf(dateKey)] + '</h3>';
   /* 休息日也可能有记录（导入的历史训练、手动补记），按训练日样式显示，但不套模板名 */
   var log0 = logOf(dateKey);
-  var hasLog = !!(log0.items && log0.items.length);
+  var hasLog = loggedReal(dateKey);
   var isTrain = dp.type === 'train';
   var trainLike = isTrain || hasLog;
 
