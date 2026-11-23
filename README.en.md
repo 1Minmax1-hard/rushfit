@@ -38,7 +38,7 @@ A **single-file, local-only** training and nutrition tool. Open it and it works 
 | **Method library** | 19 goal + split + prescription bundles, sorted by your current goal and marked ★; apply the whole thing or just the split |
 | **Templates** | Save once, reuse for three months, with a review reminder |
 | **Plugins** | Six built-in toggles (muscle tags **on by default**; Daily portions **off by default** — turn it on to work back from your target to per-meal amounts) and a tiny API to write your own |
-| **Import data** | Under Plugins → Write your own you can import body data and custom foods from a JSON file — it only writes those two, never your logs. The same card holds a **prompt for an AI**: paste it with a screenshot from your scale or health app and it returns a file you can import |
+| **Import data** | Under Settings → Write your own you can import body data, custom foods, weigh-ins and past workouts from JSON — it only writes the dates you list and leaves other records alone. The same card holds a **prompt for an AI**: paste it with a screenshot from your scale or a training log and it returns text you can import |
 | **English / 中文** | Switch under Settings → Language; the choice is remembered |
 | **Font size** | Settings → Display switches between 100 / 110 / 120 / 130%, default 110%. The whole layout scales up together — type, line height and spacing — so text never spills out of its card |
 

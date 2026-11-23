@@ -148,6 +148,15 @@ p{margin:0}
 .card-hd{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 18px 0}
 .card-hd h3{font-size:14.5px}
 .card-hd .hint{font-size:12px;color:var(--ink-3)}
+
+/* 「怎么用」折叠卡：默认一行，点击展开 */
+.howto-hd{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  width:100%;padding:14px 18px;background:none;border:0;cursor:pointer;font:inherit;text-align:left;
+  border-radius:inherit}
+.howto-hd:hover{background:var(--panel-2)}
+.howto-title{font-size:14.5px;font-weight:650;color:var(--ink)}
+.howto-chev{font-size:16px;font-weight:400;color:var(--ink-3);line-height:1;min-width:16px;text-align:center}
+.card.howto .card-bd{padding:2px 18px 18px}
 .card-bd{padding:15px 18px 18px}
 
 /* 按钮分四档：L1 主（实底绿）· L2 次（淡绿底）· L3 轻（无框灰字）· L4 危险（红字细红边，永不实心） */
@@ -464,11 +473,10 @@ pre.prompt b{color:var(--accent-2);font-weight:650}
 .rt-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
 .rt-btns{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0}
 .rt-hint{font-size:11.5px;color:var(--ink-3);line-height:1.5;overflow-wrap:anywhere;min-width:0}
-.rt-keep{display:flex;align-items:flex-start;gap:6px;margin-top:9px;padding-top:9px;border-top:1px dashed var(--line);
+.rt-keep{display:flex;align-items:center;gap:6px;margin-top:9px;padding-top:9px;border-top:1px dashed var(--line);
   font-size:11.5px;color:var(--ink-3);line-height:1.5;cursor:pointer;min-width:0}
-.rt-keep input{margin-top:2px;flex:none;accent-color:var(--accent)}
+.rt-keep input{flex:none;accent-color:var(--accent)}
 .rt-keep-t{color:var(--ink-2);font-weight:600;flex:none}
-.rt-keep-s{overflow-wrap:anywhere;min-width:0}
 .rest-timer .clock{font-family:var(--mono);font-size:20px;font-weight:700;letter-spacing:.02em;color:var(--accent-2);min-width:64px}
 .water{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .water .cups{display:flex;gap:5px}
@@ -1121,10 +1129,12 @@ const EX_META = {
   '站姿提踵':      { pat:'calf',   muscle:'小腿',  tag:'提踵' },
   '坐姿提踵':      { pat:'calf',   muscle:'小腿',  tag:'提踵' },
   '坐姿臀外展':    { pat:'glute',  muscle:'臀',    tag:'外展' },
+  '坐姿腿内收':    { pat:'glute',  muscle:'大腿内收', tag:'内收' },
   '杠铃卧推':      { pat:'pushH',  muscle:'胸',    tag:'水平推' },
   '哑铃卧推':      { pat:'pushH',  muscle:'胸',    tag:'水平推' },
   '上斜哑铃卧推':  { pat:'pushH',  muscle:'上胸',  tag:'水平推' },
   '上斜杠铃卧推':  { pat:'pushH',  muscle:'上胸',  tag:'水平推' },
+  '下斜卧推':      { pat:'pushH',  muscle:'下胸',  tag:'水平推' },
   '器械推胸':      { pat:'pushH',  muscle:'胸',    tag:'水平推' },
   '夹胸':          { pat:'pushH',  muscle:'胸',    tag:'夹胸' },
   '哑铃飞鸟':      { pat:'pushH',  muscle:'胸',    tag:'夹胸' },
@@ -1154,6 +1164,7 @@ const EX_META = {
   '平板支撑':      { pat:'core',   muscle:'核心',  tag:'抗伸展' },
   '死虫':          { pat:'core',   muscle:'核心',  tag:'抗伸展' },
   '侧桥':          { pat:'core',   muscle:'侧链',  tag:'抗侧屈' },
+  '负重体侧屈':    { pat:'core',   muscle:'侧链',  tag:'侧屈' },
   '卷腹':          { pat:'core',   muscle:'腹直',  tag:'屈曲' },
   '器械卷腹':      { pat:'core',   muscle:'腹直',  tag:'屈曲' },
   '绳索卷腹':      { pat:'core',   muscle:'腹直',  tag:'屈曲' },
@@ -1461,7 +1472,7 @@ var EN = {
   "先选食材、填克数": "Pick a food and enter grams",
   "已隐藏": "Hidden",
   "种食材": "foods",
-  "钠：快速记录会按食材自身含量自动累加（每 100 g 典型值）。": "Sodium: each quick add already contributes the food's own sodium (typical values per 100 g, same sources as above). ","盐、酱油、酱料不在食物库里": "Salt, soy sauce and condiments are not in the food list"," —— 在「钠」那行把调味料补进去：1 g 盐 ≈ 400 mg 钠，1 汤匙生抽 ≈ 1000 mg。直接改数字是覆盖，不是相加。": " — add them to the Sodium row: 1 g salt ≈ 400 mg sodium, 1 tbsp soy sauce ≈ 1000 mg. Typing a number replaces the value, it does not add to it.","分数 = 各项加权，每项 0–100 分：": "Score = weighted average of six items, each 0–100: ","0 不是没记，而是这项离目标太远": "0 does not mean \"not logged\" — it means that item is far from target","；钠需要记录才计分，「未记录」不扣分也不算满分。": "; sodium only counts once logged — \"not logged\" neither loses nor earns points.","未记录": "Not logged","今天几乎没吃，这是拉低分数的主因。": " — almost absent today, which is pulling the score down.","钠 mg": "Sodium mg","漂亮，今天很稳。": "Nice — steady day.","满分节奏，别改。": "Full marks. Do not change a thing.","这状态，保持住就行。": "This is the rhythm — just keep it.","不错，就差一点。": "Good, just a little short.","大方向对了，收个尾。": "Right direction — finish it off.","再补一点就到满分。": "A bit more and it is a perfect score.","加油，还差一口气。": "Almost there — one more push.","及格了，往前挪一步。": "You passed — now nudge it up.","差的不多，补上就行。": "Not far off. Top it up.","今天先这样，明天补回来。": "That is today. Catch up tomorrow.","别急，先吃口饭。": "No rush — go eat something first.","记录比分数重要，继续。": "Logging beats scoring. Keep going.","分数 = 蛋白 / 热量 / 碳水 / 脂肪 / 纤维 / 钠六项加权；吃少和吃多都扣分，钠需记录才计分。": "Score = weighted average of protein, calories, carbs, fat, fibre and sodium. Both undereating and overeating lose points; sodium only counts once logged.","钠": "Sodium","前束": "Front delt","超量": "over","超 ": "over ","删掉这条并从今日摄入扣掉": "Remove this entry and subtract it from today's intake","早餐不吃肉": "No meat at breakfast","今天吃过什么": "Eaten today","今天还没有记录": "Nothing logged yet","早餐吃肉": "Meat at breakfast","含肉": "Meat","不含肉": "No meat","营养评分": "Nutrition score","优秀": "Excellent","良好": "Good","一般": "Fair","待改善": "Needs work","动作部位注释": "Muscle tags","全局": "Global","条 · 合计": " entries · total ","最需要补 ": "Biggest gap: ","最需要控制 ": "Over target: ","现在只完成 ": "only ","已经到目标的 ": "at ","各项都在目标附近，保持住就行。": "Everything is near target. Keep it up.","吃少和吃多都扣分": "undereating and overeating both lose points","热量 训练日高 / 休息日低": "Calories: high on training days","热量 每天一致 · 高碳": "Calories: flat, high carb","热量 每天一致": "Calories: flat","还没有记录。用上面的「快速记录」选食物 + 克数点「加入」，这里会按时间顺序列出来，方便回看今天到底吃了什么。": "Nothing logged yet. Use Quick add above — every entry shows up here in order.","点 × 会删掉这条并从「今日摄入」里扣回去。如果你又手动改过上面的数字，以表格为准。": "× removes the entry and subtracts it from today's intake. If you also edited the numbers by hand, the table wins.","在每个动作名后面标出它练到的部位（主动肌 · 协同肌 · 稳定肌），按参与度排序。比如「面拉（后束 · 背 · 二头）」，不用再猜这个动作到底练哪儿。": "Shows the muscles each exercise targets (prime mover · synergists · stabilisers), ordered by contribution.","用「快速记录」加一条，或直接在下面表格里填数字，这里会按蛋白 / 热量 / 碳水 / 脂肪 / 纤维 / 钠六项算分。": "Add an entry with Quick add, or type numbers in the table below. The score covers protein, calories, carbs, fat, fibre and sodium.","三头": "Triceps","上周": "last week","上次": "Last","上胸": "Upper chest","下压": "pushdown","下腹": "Lower abs","个月": " months","中束": "Side delt","主项": "Main lift","主食": "Staples","二头": "Biceps","休息": "Rest","体重": "Weight","侧桥": "Side plank","侧链": "Obliques","保存": "Save","偏低": "low","偏高": "high","克数": "Grams","免责": "Disclaimer","全身": "Full body","其他": "Other","冷冻": "Frozen","减脂": "Cut","刚好": "on target","加入": "Add","包菜": "Cabbage","单腿": "single-leg","卷腹": "Crunch","取消": "Cancel","右腿": "Right leg","右臂": "Right arm","名称": "Name","后束": "Rear delt","后链": "Posterior chain","周均": "Weekly avg","土豆": "Potato","塑形": "Recomp","增肌": "Bulk","外展": "abduction","外旋": "external rotation","夹胸": "Chest fly","容量": "Volume","小腿": "Calves","就绪": "Ready","屈曲": "flexion","屈髋": "hip flexion","左腿": "Left leg","左臂": "Left arm","差额": "Gap","已补": "Added","年龄": "Age","开关": "toggle","弯举": "curl","手臂": "Arms","提踵": "calf raise","插件": "Plugins","收起": "Collapse","更多": "More","有氧": "Cardio","有氧类型": "Cardio type","本周": "This week","核心": "Core","模板": "Templates","横条": "Bars","正常": "normal","死虫": "Dead bug","水分": "Water","油脂": "Fats","清零": "Clear","热量": "Calories","牛肉": "Beef","番茄": "Tomato","目标": "Target","直臂": "straight-arm","碳水": "Carbs","米饭": "Rice","精力": "Energy","纤维": "Fiber","组间": "Rest","组（": " sets (","维持": "Maintain","股四": "Quads","肩袖": "Rotator cuff","胶囊": "Chips","脂肪": "Fat","腹直": "Abs","腿举": "Leg press","腿后": "Hamstrings","膝伸": "knee ext","膝屈": "knee flex","臀": "Glutes","臀推": "Hip thrust","自建": "Custom","自重": "BW","苹果": "Apple","营养": "Nutrition","蔬菜": "Veg","蛋白": "Protein","表现": "Performance","规格": "Spec","计划": "Plan","训练": "Train","记录": "Log","身高": "Height","躯干": "Torso","达成": "done","还差": "short","还有": "left","进度": "Progress","酸奶": "Yogurt","间接": "indirect","静息": "RMR","面拉": "Face pull","面条": "Noodles","饮水": "Water","首次": "First","香蕉": "Banana","香蕉（去皮）": "Banana (peeled)","鸡蛋": "Egg","默认": "Default","上一周": "Previous week","上一月": "Previous month","上下肢": "Upper/Lower","上肢拉": "Upper pull","上肢推": "Upper push","下一周": "Next week","下一月": "Next month","不力竭": "no failure","中等量": "moderate volume","主蛋白": "Main protein","仅详情": "Detail only","今天（": "Today (","仍不足": "still short","休息日": "Rest day","体水分": "Body water","体脂率": "Body fat %","依据：": "Basis: ","侧平举": "Lateral raise","周目标": "Weekly target","周计划": "Schedule","垂直拉": "Vertical pull","垂直推": "Vertical push","天到期": "days left","娃娃菜": "Baby cabbage","已保存": "Saved","已删除": "Deleted","已加入": "Added","已完成": "completed","已换成": "switched to","已清零": "cleared","已记录": "logged","已过期": "expired","已配平": "balanced","怎么用": "How to use","恢复日": "Rest day","扩展点": "Extension point","抗伸展": "anti-extension","抗侧屈": "anti-lateral flexion","拉为主": "pull-dominant","推为主": "push-dominant","推拉腿": "Push/Pull/Legs","无记录": "No record","日 –": " - ","有效期": "Valid for","有氧：": "Cardio: ","未填：": "Missing: ","未录入": "not set","植物油": "Vegetable oil","每次约": "about","水平拉": "Horizontal pull","水平推": "Horizontal push","燕麦片": "Oats","瘦体重": "Lean mass","白砂糖": "White sugar","糖 g": "Sugar g","练/周": " sessions/wk","组 ·": " sets ·","继续？": "continue?","肌肉量": "Muscle mass","背二头": "Back & biceps","胡萝卜": "Carrot","脂肪量": "Fat mass","腿屈伸": "Leg extension","腿弯举": "Leg curl","自定义": "Custom","营养素": "Nutrient","蛋白类": "protein foods","蛋白粉": "Whey powder","蛋白质": "Protein","西兰花": "Broccoli","训练日": "Training day","许可证": "License","调整「": "Adjust “","蹲主导": "squat-led","髋主导": "hip-led","髋铰链": "hip hinge","高容量": "high volume","高密度": "high density","魔芋爽": "Konjac snack","鸡胸肉": "Chicken breast","）蛋白": ") protein","，脂肪": ", fat","↑ 可试": "↑ try","」类动作": "“ exercises","上周均值": "Last week avg","上肢 A": "Upper A","上肢 B": "Upper B","下肢 A": "Lower A","下肢 B": "Lower B","下肢前链": "Lower anterior chain","下肢后链": "Lower posterior chain","个训练日": " training days","今天碳水": "Carbs today","今天要吃": "Eat today","今日摄入": "Today's intake","传统硬拉": "Conventional deadlift","低碳高脂": "low-carb, high-fat","低脂夸克": "Low-fat quark","全周一致": "Flat all week","全周同碳": "Same carbs daily","全周高碳": "High carb all week","全身 A": "Full body A","全身 B": "Full body B","全身 ·": "Full body ·","全部清零": "Clear all","全麦面包": "Whole-wheat bread","关于 ·": "About ·","其他动作": "Other exercises","冰岛酸奶": "Skyr","分化方式": "Split","力量优先": "strength-first","包装标示": "label","只换课表": "Split only","同类动作": "Similar exercises","哑铃卧推": "Dumbbell bench","哑铃弯举": "Dumbbell curl","器械推胸": "Machine chest press","回到本月": "This month","坐姿划船": "Seated row","坐姿提踵": "Seated calf raise","基础代谢": "BMR","备份 ·": "Backup ·","存为模板": "Save as template","导入备份": "Import","导出备份": "Export","展开全部": "Show all","已套用「": "Applied “","已添加「": "Added “","已设为「": "Set to “","平板支撑": "Plank","引体向上": "Pull-up","悬垂举腿": "Hanging leg raise","我的模板": "My templates","我的课表": "My schedule","手动输入": "Manual entry","按干重称": "weigh dry","按熟重称": "weigh cooked","排课设置": "Schedule setup","推荐 ·": "Recommended ·","提高精力": "Energy","最近记录": "Latest entry","本周容量": "Weekly volume","本周已有": "This week has","本周总量": "Weekly tonnage","杠铃卧推": "Barbell bench","杠铃深蹲": "Barbell squat","模板名称": "Template name","每天几餐": "Meals per day","活动系数": "Activity factor","深蹲为主": "squat-focused","混合坚果": "Mixed nuts","生，去壳": "raw, shelled","直臂下压": "Straight-arm pulldown","碳水 g": "Carbs g","碳水分配": "Carb timing","站姿提踵": "Standing calf raise","纤维 g": "Fiber g","练/周（": " sessions/wk (","绳索下压": "Cable pushdown","缺口换算": "gap math","肌肉蛋白": "Muscle protein","股四/臀": "Quads/Glutes","胸/三头": "Chest/Triceps","胸托划船": "Chest-supported row","胸肩三头": "Chest, delts, triceps","脂肪 g": "Fat g","脂肪指数": "FMI","膳食纤维": "Dietary fiber","自动配平": "Auto-balance","自由训练": "Freestyle","蛋白 g": "Protein g","训练法库": "Method library","该更新了": "needs update","身体数据": "Body data","身体模型": "Body model","运动表现": "Performance","配平后：": "After balancing: ","食材管理": "Manage foods","饮水记录": "Water log","（今天）": " (today)","＋ 运动": "+ exercise","」策略生成": "“ strategy","上下肢分化": "Upper/Lower","个动作 ·": " exercises ·","休息日 ·": "Rest day ·","休息日脂肪": "Rest fat","低于目标：": "Below target: ","体重来源：": "Weight source: ","六角杠硬拉": "Trap-bar deadlift","卡片上的「": "The “","双杠臂屈伸": "Dips","同类动作（": "Similar exercises (","哑铃侧平举": "Dumbbell lateral raise","在顶部切换": "switch at the top","坐姿臀外展": "Seated hip abduction","已安装插件": "Installed plugins","已导入备份": "Backup imported","已导出备份": "Backup exported","弹力带外旋": "Band external rotation","当前策略：": "Current strategy: ","改为休息日": "Make rest day","改为训练日": "Make training day","未填体水分": "no body water","未填体脂率": "no body fat","本周还没排": "not scheduled yet","添加糖上限": "Added sugar cap","空白训练日": "Blank session","自己写": "Write your own","训练日 ·": "Training day ·","训练日脂肪": "Training fat","训练日高碳": "High carb on training days","还差一点：": "Almost there: ","顺序已保存": "Order saved","高脚杯深蹲": "Goblet squat","g　|　蛋白": "g | protein","上斜哑铃卧推": "Incline dumbbell press","低碳高脂 ·": "low-carb high-fat ·","全周高碳 ·": "high carb all week ·","包装标示均值": "label average","匹配当前目标": "matches current goal","单臂哑铃划船": "One-arm dumbbell row","双腿（单侧）": "Legs (each)","宽握高位下拉": "Wide-grip pulldown","已套用到本周": "Applied to this week","开关即时生效": "toggles apply instantly","按计划重量起": "start at planned weight","改完立即重算": "recalculates instantly","最小有效剂量": "minimum effective dose","每周 1 练": "1 session/week","每周训练次数": "Sessions per week","每天该吃多少": "Daily portions","每肌群周容量": "Weekly volume by muscle","点锁图标解锁": "tap the lock to unlock","目标 17%": "Target 17%","窄距高位下拉": "Close-grip pulldown","策略已切换：": "Strategy switched: ","罗马尼亚硬拉": "Romanian deadlift","肌肉量 kg": "Muscle mass kg","训练法库 ·": "Method library ·","课表已换成「": "Schedule switched to “","这节课练什么": "What to train","+ 自定义食材": "+ Custom food","kcal 目标": "kcal target","上下肢 4 练": "Upper/Lower 4x","今日 TDEE": "TDEE today","以后不再推荐「": "Never suggest “","体重 − 脂肪": "weight − fat","例如 2450": "e.g. 2450","保加利亚分腿蹲": "Bulgarian split squat","其余在区间内。": "the rest are in range.","周均 TDEE": "Weekly avg TDEE","周训练总量趋势": "Weekly tonnage trend","在本文件末尾的": "append to the end of","已吃 / 应吃": "Eaten / Target","已清空当天勾选": "Cleared today's checks","当前缺口：蛋白": "Current gap: protein","按目标排序 ·": "sorted by goal ·","按目标补齐组数": "Fill sets to target","推拉腿 4 练": "PPL 4x","推拉腿 5 练": "PPL 5x","改完立刻生效。": "Applies immediately.","普通 3.5%": "Regular 3.5%","次记录取均值）": " entries averaged)","每肌群每周组数": "sets per muscle per week","活动消耗怎么算": "How activity is estimated","热量 kcal": "Calories kcal","烹调油 / 天": "Oil / day","由目标反推份量": "portions from your target","硬拉 + 单腿": "Deadlift + single-leg","组间休息计时器": "Rest timer","考试周保底 ·": "Exam-week minimum ·","股四 + 后链": "Quads + posterior","训练日高亮 ·": "training days highlighted ·","请输入合理体重": "Enter a realistic weight","走路 + 早睡": "Walk + sleep early","需要先填体脂率": "body fat % required first","一种食材吃到上限": "one food hitting its cap","今晨空腹体重记录": "This morning's fasted weight","休息日 TDEE": "Rest-day TDEE","休息日只算前一半": "rest days only get the first half","体重均值驱动 ·": "driven by average weight ·","先给食材起个名字": "Give the food a name first","全身 2 练 ·": "Full body 2x ·","全身 3 练 ·": "Full body 3x ·","减脂增肌同时进行": "fat loss and muscle gain at once","存一次复用三个月": "save once, reuse for 3 months","改一个数全部重算": "change one number, everything recalculates","每肌群周容量 ·": "weekly volume by muscle ·","每肌群周组数 ·": "weekly sets per muscle ·","睡眠 7.5 h": "Sleep 7.5 h","约 50 g/个": "~50 g each","色条是当天完成度": "the bar is that day's completion","训练日 TDEE": "Training-day TDEE","还差什么，怎么补": "What's missing, how to fix","1 包约 20 g": "~20 g per pack","★ 是你当前的目标": "★ marks your current goal","」，目标与吃法没动": "“, goal and diet unchanged","上下肢 4 练 ·": "Upper/Lower 4x ·","今天不做力量训练。": "No lifting today.","全身 A/B 交替": "Full body A/B","同肌群，换个模式（": "Same muscle, different pattern (","已吃 / 应吃 ·": "Eaten / Target ·","手表近 7 天均值": "7-day watch average","推 / 拉 / 腿": "Push / Pull / Legs","数据只在这台设备上": "data stays on this device","由身体模型 + 「": "from body model + “","运动之外的活动强度": "Activity outside training","还没有保存的模板。": "No saved templates yet.","），插件可以直接读": "), plugins can read","休息结束，可以开始了": "Rest over — go","你已经设置了不推荐「": "You excluded “","全周高碳（脂肪最低）": "High carb all week (lowest fat)","按 10% 冰衣折算": "glaze-adjusted by 10%","目标 2000 ml": "target 2000 ml","训练记录里的活动热量": "exercise calories from your watch","里追加即可，插槽可选": "; slots are","钠含量很高，容易水肿": "very high sodium, causes water retention","锁定后配平不改这个数": "locked: balancing won't change it","（已吃 / 应吃）·": "(eaten / target) ·","，所以两天天然不同。": ", so the two days differ naturally.","」类，所以这里不显示。": "“ category, so it is hidden here.","中国食物成分表 第6版": "China Food Composition Tables (6th ed.)","体力工作 + 高频训练": "Manual labour + frequent training","只看体重会以为没效果。": "judging by weight alone looks like nothing happened.","改了克数就会自动锁定；": "editing grams locks that food;","绿色是缺口，红色是超标": "green = gap left, red = over","至少保留 2 个训练日": "keep at least 2 training days","训练日高 / 休息日低": "High on training days / low on rest days","走路 8000 步 ·": "8,000 steps ·","默认三个月需要复查一次": "3 months by default, then review","上下肢 4 练 + 快走": "Upper/Lower 4x + walking","导出失败，换个浏览器试试": "Export failed — try another browser","推拉腿 3 练 + 骑车": "PPL 3x + cycling","点动作旁的「休」直接开始": "tap “Rest” next to an exercise to start","这类食材都已经在列表里了": "all foods in this category are already listed","，建议每周导出一次备份。": "; export a backup weekly.","2 练 + 1 次轻量全身": "2 sessions + 1 light full body","81%，25 g=2 平勺": "81%, 25 g = 2 level scoops","上下肢 4 练 + 立定跳": "Upper/Lower 4x + broad jumps","久坐 + 每周 1–2 练": "Sedentary + 1–2 sessions/wk","全身 2 练 + 每天走路": "Full body 2x + daily walking","关掉就不再出现在周计划里。": "turn it off and it disappears from the schedule.","减量减的是组数，不是强度；": "cut sets, not load;","分段肌肉量（体脂秤，kg）": "Segmental muscle (scale, kg)","力量 4 练 + 爆发模块": "Strength 4x + power block","想看到清晰腹肌，男性通常要": "Visible abs usually need","自己加动作，适合想试新计划": "add your own exercises; good for experimenting","这个动作今天已经在清单里了": "that exercise is already in today's list","颜色 = 分段相对参考区间": "colour = segment vs reference range","2 × 20 min 低强度": "2 × 20 min easy","与力量课分开，或放在非训练日": "separate from lifting, or on rest days","参与配平的食材（点一下开关）": "Foods in the pool (tap to toggle)","完整数据在下方训练日详情里。": "full details are in the day panel below.","已保存，默认三个月后提醒复查": "saved; review reminder in 3 months","快速记录（选食物 + 克数）": "Quick log (food + grams)","手表：今天运动消耗 kcal": "Watch: exercise kcal today","按包装毛重称会低估约 10%": "weighing with glaze underestimates by ~10%","推拉腿 4 练 + 有氧分开": "PPL 4x + separate cardio","明确制造热量缺口，体重会掉。": "a clear calorie deficit; weight will fall.","水平向和垂直向各留一个动作。": "keep one horizontal and one vertical movement.","碳水恒定能减少日间精力波动；": "steady carbs reduce energy swings;","调整顺序 / 删除自定义食材": "Reorder / delete custom foods","默认有效三个月，到期会标黄。": "valid 3 months by default, then highlighted.","中国食物成分表 第6版（近似）": "China Food Composition Tables (6th ed., approx.)","休息日低碳是可选优化，不是必需": "low-carb rest days are optional, not required","保持频率，把有氧放在非训练日。": "keep frequency, put cardio on rest days.","当前目标的方法排最前，带 ★。": "methods for your goal come first, marked ★.","日常走动多（校区通勤、常站着）": "Mostly on your feet (campus, standing)","早餐蛋白 35 g+，睡眠优先": "35 g+ protein at breakfast; sleep first","每周加 2 次 20 分钟快走": "add 2 × 20 min brisk walks per week","源码与反馈见仓库 README": "source and feedback in the repo README","热量留空会按 4/9/4 估算": "leave kcal blank to estimate with 4/9/4","练的那天和不练的那天热量不一样": "training and rest days differ in calories","不制造缺口，碳水日间波动最小化；": "no deficit, minimal day-to-day carb swing;","久坐为主（教室/图书馆/电脑前）": "Mostly seated (class, library, desk)","体力工作 / 每天 1 万步以上": "Manual work / 10k+ steps a day","例如：鸡胸肉罐头 / 食堂红烧肉": "e.g. canned chicken / cafeteria braised pork","保证一周总量不变、但每天数值不同": "weekly total unchanged, daily values differ","包装营养成分表（每 100 g）": "Nutrition label (per 100 g)","只改分化与训练日，不动目标和吃法": "changes split and days only — not goal or diet","已经没有可加的了，试试换一个分化": "nothing left to add — try another split","校正值，18–20 为训练者区间": "adjusted; 18–20 is the trained range","每天走动多 + 每周 4–5 练": "Active days + 4–5 sessions/wk","适合课业重、白天容易掉电的阶段。": "for heavy coursework and afternoon crashes.","长按拖动排序，左滑显示替换/删除": "long-press to reorder, swipe left for swap/delete","高频分化，适合恢复能力好的阶段。": "high frequency, for when recovery is good.","上课、上班时间不固定时的默认选择。": "the default when class and work hours vary.","不减不增，先把吃、睡、练稳定下来。": "no deficit, no surplus — stabilise food, sleep, training.","代价是脂肪偏低，坚果和油要按量吃。": "the trade-off is low fat; measure nuts and oil.","体重几乎不变，脂肪变少、肌肉变多。": "weight barely moves; fat down, muscle up.","复合动作的间接刺激按 0.5 组计": "compound carry-over counts as 0.5 set","导入会覆盖当前全部记录，确定继续？": "importing overwrites all current records. Continue?","缺口靠吃、有氧省时间、力量保肌肉；": "deficit from food, cardio saves time, lifting keeps muscle;","这个文件不像是 RushFit 的备份": "that file is not a RushFit backup","，渲染时会自动调用 render。": "; render is called automatically.","体重稳定，重点放在动作质量和训练容量": "weight stable; focus on technique and total volume","换浏览器、清理缓存或卸载都可能丢数据": "Switching browsers, clearing cache or uninstalling loses data","称重口径：肉为生重，米饭面条为熟重。": "Weigh meat raw, rice and noodles cooked.","第三次只做 3 个主项，各 2 组。": "the third session is 3 main lifts × 2 sets.","默认有效期三个月，到期会提醒你复查。": "valid 3 months by default, then you are reminded.","1–2 × 20 min，别排在练腿日": "1–2 × 20 min, not on leg day","FFMI 按瘦体重计算（含身高校正）；": "FFMI uses lean mass (height-adjusted);","全身 3 练 + 有氧 150 min": "Full body 3x + 150 min cardio","力量不降，有氧单独安排，缺口靠吃制造。": "keep loads, schedule cardio separately, eat the deficit.","导出为完整 JSON，换手机时导入即可": "full JSON export; import it on a new phone","手表：近 7 天平均「总消耗」kcal": "Watch: 7-day average total kcal","日常走动 + 每周 3–4 练（推荐）": "Active days + 3–4 sessions/wk (recommended)","每个动作先给 1 组，练几组记几组 ·": "one set per exercise to start; log what you do ·","现在没有选中任何食材，所以算不出方案。": "no foods selected, so there is nothing to solve.","上肢/下肢交替，单次动作少，练完不太累。": "upper/lower alternating, fewer lifts per session.","力量训练的热量估算误差常在 20–40%": "lifting calorie estimates are often off by 20–40%","同时训练对爆发力伤害最大，跑步大于骑车；": "concurrent training hurts power most; running > cycling;","主项 5 组 5 次，辅项 8–12 次。": "main lifts 5×5, accessories 8–12.","只保留 3 个动作，各 2 组，重量照旧。": "just 3 lifts × 2 sets, same loads.","插件 = 一个对象 + 一个 render": "a plugin = an object + a render","有氧单独排在非训练日，间隔 6 小时以上。": "cardio on rest days, 6+ hours apart.","每次一个模式，骑车比跑步更不干扰腿部恢复。": "one pattern per session; cycling interferes less.","水平向动作不能省（Wilson 2012）": "do not drop horizontal work (Wilson 2012)","缺口控制在 20% 以内，主项重量不许掉；": "keep the deficit under 20%; main lifts must not drop;","2 × 20–25 min 快走（中等强度）": "2 × 20–25 min brisk walk (moderate)","全身课把频率拉到 3 次，单次 6 个动作。": "full-body 3x, six lifts per session.","推/拉/腿循环，单次专注一个模式，动作数多。": "push/pull/legs rotation, one pattern per session.","数据全部存在 localStorage（键名": "everything lives in localStorage (key","方法卡上的「胸 / 背 / 腿 8–10」是": "the “chest / back / legs 8–10” on a card is","每动作 1–2 组、重量不变，重点是不退步。": "1–2 sets per lift, same load; the point is not regressing.","这天已经记过完成的组，换课会清空当天的勾选。": "sets are already logged today; changing the session clears them.","8 个肌群全部落在目标区间内，这一周不用再调。": "all 8 muscles are in range — nothing to adjust this week.","减脂期 2.0–2.2 g/kg 保瘦体重）。": "2.0–2.2 g/kg when cutting to protect lean mass).","强度掉了才是真掉（Spiering 2021）": "losing load is what real detraining looks like (Spiering 2021)","每肌群 14–18 组/周，主项 3–4 组。": "14–18 sets per muscle/week; main lifts 3–4 sets.","训练日 = 静息 × 日常活动 + 运动消耗；": "training day = RMR × activity + exercise;","做二次分析，比如导出 CSV、生成周报、接通知。": "for secondary analysis — CSV export, weekly reports, notifications.","每次课前 3–5 组跳跃，力量主项 3–6 次。": "3–5 sets of jumps before each session; main lifts 3–6 reps.","每肌群 12–14 组/周，配合小缺口和高蛋白。": "12–14 sets per muscle/week with a small deficit and high protein.","爆发力模块要放在课前，疲劳状态下练跳跃等于练耐力": "power work goes first; jumping while tired trains endurance","自定义食材（填每 100 g 的营养，包装上都有）": "Custom food (per 100 g — it is on the label)","课业最重时用，力量只到最低有效量，靠步数维持代谢。": "for the heaviest weeks: minimum effective lifting, steps for metabolism.","，套用后回到「周计划」能看到实际命中多少、差多少。": "; after applying, the schedule shows what you actually hit.","判断标准看三样：腰围下降、主项重量上涨、体脂率缓降；": "judge by three things: waist down, main lifts up, body fat slowly down;","有慢性病、正在用药、怀孕或受伤时，请先咨询专业人士。": "with a chronic condition, medication, pregnancy or injury, ask a professional first.","每天碳水都在 4.5–5 g/kg，不做低碳休息日。": "carbs stay at 4.5–5 g/kg every day — no low-carb rest days.","吃在维持线，体重不变，把时间花在动作质量和训练容量上。": "eat at maintenance, hold weight, spend time on technique and volume.","每周 150–250 min 快走/骑车，与力量课分开": "150–250 min/week walking or cycling, separate from lifting","注意这跟上面按肌群算的「本周容量（组数）」不是一回事。": "note this is not the same as the by-muscle set count above.","跑步对下肢力量的干扰大于骑车（Wilson 2012）": "running interferes with leg strength more than cycling (Wilson 2012)","减脂期降重量会让瘦体重掉得更快（Willis 2012）": "cutting load while dieting speeds lean-mass loss (Willis 2012)","当前 19% 先做 17%，是 8–10 周的现实目标。": "from 19% to 17% is a realistic 8–10 week goal.","，所以它只是身体模型的一个输入，不是消耗多少就吃回多少。": ", so it feeds the model — you do not eat back what you burn.","A/B 交替，每块肌肉每周 3 次刺激，单次 50 分钟。": "A/B alternating, each muscle 3× a week, 50 minutes a session.","套用到下一周：先把顶部周切换箭头点到下一周，再点「套用」。": "to apply to next week: arrow to it at the top, then press Apply.","身体模型优先用上周空腹体重的平均值，避免单日水分波动误导。": "the model prefers last week's average fasted weight to avoid water-noise.","重量按上次自动带入，次数取区间中值，组数不够就点「+ 组」": "weight carries over, reps default to the midpoint, add sets as you go","套用会同时切换目标策略、分化方式、训练日，并清空本周手动改动": "applying switches goal, split and days, and clears manual edits this week","轻微盈余、碳水优先，为训练强度和恢复服务，体型不是第一目标。": "a slight surplus, carbs first, serving intensity and recovery.","选完会按这节课的动作清单生成，已记录的勾选会保留在旧记录里。": "the session is generated from that template; existing logs stay in the old record.","训练日按顺序套用当前分化，休息日自动切换低碳/高脂的饮食目标。": "training days follow the split in order; rest days switch to low-carb/high-fat.","小米手表里找「消耗」或「活动+静息」的合计值，别只填运动那一项。": "on a Xiaomi watch use total calories, not just the workout entry.","小缺口 + 高蛋白 + 力量优先，腰围下降而体重几乎不动是正常的": "small deficit + high protein + strength first; waist down, weight flat","碳水优先，训练前 90 分钟补一份主食，练后 2 小时内吃够蛋白": "carbs first: a starch 90 min pre, protein within 2 h post","把下面食材的开关打开，或者用「+ 自定义食材」加一个你自己常吃的。": "turn on some foods below, or add one you actually eat.","蛋白区间依据 ISSN 立场声明（1.4–2.0 g/kg 维持；": "protein range follows the ISSN position stand (1.4–2.0 g/kg maintenance;","低强度有氧对疲劳感的改善大于中等强度（Puetz 2008 RCT）": "low-intensity cardio beat moderate for fatigue (Puetz 2008 RCT)","盈余 10–12%，每周涨 0.2–0.3 kg 就够，涨太快是脂肪": "10–12% surplus; 0.2–0.3 kg/week is enough — faster is fat","目标：8000 步以上、蛋白质不降、碳水降一档、睡前 7.5 小时。": "targets: 8,000+ steps, protein unchanged, carbs one notch down, 7.5 h sleep.","力量训练在缺口下保住瘦体重，有氧负责扩大缺口（Murphy 2022）": "lifting preserves lean mass in a deficit; cardio widens it (Murphy 2022)","按当前目标算每个肌群这周该做多少组、实际排了多少组，缺口可以一键补齐。": "weekly sets per muscle vs target, with one-tap catch-up.","缺数据不影响使用——体重在就能算，其余按默认值估算，营养模块照常工作。": "missing data is fine — weight is enough; the rest falls back to defaults.","蛋白拉到 2.2 g/kg 保住肌肉，力量和精力可能短期下滑，属正常。": "protein at 2.2 g/kg spares muscle; strength and energy may dip briefly.","就是\"减脂增肌同时进行\"（英文 body recomposition）。": "fat loss and muscle gain at the same time (body recomposition).","」只改分化与训练日，不动目标和吃法——已经定好吃法、只想换个练法时用这个。": "“ changes split and days only — use it when the diet is settled.","「存为模板」保存的是那一周的实际动作清单（含起始重量），适合固定课表的阶段。": "“Save as template” stores the actual exercise list with starting weights.","体脂秤上的 17.5 用的是另一套公式，两者不用互相对照，看自己的趋势即可。": "the scale's 17.5 uses another formula; track your own trend.","在「周计划」里点「存为模板」，就能把这一周的动作、组数、起始重量存下来复用。": "press “Save as template” in the schedule to reuse this week.","填周均值即可：系统会把训练日上调约 5%，休息日按「一周总量守恒」下调，所以": "enter a weekly average: training days +5%, rest days scaled down, so","每周 2 次以上频率优于 1 次（Schoenfeld 2016 meta）": "2+ sessions per muscle beat 1 (Schoenfeld 2016 meta)","中等强度对「疲劳感」的改善最好，强度过高或过低都变差（Wender 2022）": "moderate intensity helps fatigue most; too hard or too easy is worse (Wender 2022)","热量盈余 10–12%，体重缓慢上涨，力量和肌肉长得最快，但脂肪也会同步增加。": "10–12% surplus; weight climbs slowly, strength and muscle fastest, fat too.","同等容量下分化方式对增肌无显著差异，关键是总组数（Schoenfeld 2019）": "at equal volume, split choice barely matters — total sets do (Schoenfeld 2019)","垂直向训练补不上短距离冲刺和水平跳，两个方向都不能省（2023 力向量 meta）": "vertical work does not cover sprints or horizontal jumps (2023 force-vector meta)","小缺口 + 高容量 + 高蛋白，体重几乎不动而腰围下降（Barakat 2020）": "small deficit + high volume + high protein: waist down, weight flat (Barakat 2020)","已选食材加到各自份量上限也补不齐，加一种同类（不同食物，比如燕麦或面条）通常就够了。": "even at their caps these foods cannot close the gap; add another staple (oats, noodles).","运动消耗填 0 的话两天会一样，建议填 200–300（45–60 分钟力量训练）。": "with 0 exercise calories both days look the same; 200–300 fits 45–60 min of lifting.","1 kg 脂肪 ≈ 7700 kcal，所以每周 0.3–0.5 kg 是可持续速度。": "1 kg of fat ≈ 7,700 kcal, so 0.3–0.5 kg/week is sustainable.","短于 2 周的停训几乎不影响表现，但连续 4 周会明显掉（Spiering 2021）": "under 2 weeks off barely matters; 4 weeks does (Spiering 2021)","在周计划里显示本周与上周的总训练量（kg = 重量×次数×组数），防止“练了但没进步”。": "weekly vs last week tonnage (kg = load × reps × sets) so you notice stalls.","每周 2 次/肌群优于 1 次，更高频率需配合足够热量（Schoenfeld 2016）": "2×/week per muscle beats 1×; higher frequency needs enough calories (Schoenfeld 2016)","每天 8 杯（250 ml/杯）的打卡条，帮你把水分补够——影响力量、饱腹和体成分读数。": "8 × 250 ml checkboxes — hydration affects strength, satiety and readings.","这个系数是「一周平均」，系统会按你的训练次数自动拆成训练日（+5%）和休息日（等量下调），": "this factor is a weekly average; the app splits it into +5% training days and scaled rest days,","容量与频率是增肌主变量，单肌群超过约 10 组/周收益递减（Schoenfeld 2017）": "volume and frequency drive growth; beyond ~10 sets/muscle/week returns diminish (Schoenfeld 2017)","容量与频率是增肌主变量，约 10 组/肌群/周以上收益递减（Schoenfeld 2017）": "volume and frequency drive growth; above ~10 sets/muscle/week returns diminish (Schoenfeld 2017)","：本工具提供的是一般性训练与营养信息，不构成医疗建议，不能替代医生或注册营养师的诊断与处方。": ": general training and nutrition information, not medical advice; it does not replace a doctor or dietitian.","「全周高碳」会把脂肪压到 0.7 g/kg，适合上课上班时间不固定、没法在休息日刻意控碳的人；": "“High carb all week” pushes fat to 0.7 g/kg — for irregular schedules;","每周 1 次、每动作 1 组、重量不变可维持力量与肌肉 32 周（Spiering 2021）": "1×/week, 1 set per lift, same load holds strength and muscle for 32 weeks (Spiering 2021)","力量+有氧组体脂率和腰围降得最多，纯力量组甚至体重上升（Willis 2012 STRRIDE）": "lifting + cardio cut fat and waist most; lifting alone gained weight (Willis 2012 STRRIDE)","同时训练对爆发力伤害最大（ES 0.91→0.55），分开安排能减少干扰（Wilson 2012）": "concurrent training hurts power most (ES 0.91→0.55); separating helps (Wilson 2012)","每周 1 次、每动作 1 组、重量不变，就能维持力量与肌肉长达 32 周（Spiering 2021）": "1×/week, 1 set each, same load maintains strength and muscle for 32 weeks (Spiering 2021)","缺口约 500 kcal/天时瘦体重增长归零，300–400 才可能同时增肌（Murphy 2022）": "at ~500 kcal/day deficit lean gain stops; 300–400 allows recomp (Murphy 2022)","5–30 次只要接近力竭增肌相当，但 20% 1RM 组只涨 8.9%（Lasevicius 2018）": "5–30 reps near failure grow similarly, but 20% 1RM gained only 8.9% (Lasevicius 2018)","中等强度对精力的改善最好，练到力竭反而更累（Wender 2022，81 项 RCT / 7050 人）": "moderate intensity improves energy most; training to failure adds fatigue (Wender 2022)","是「目标 + 分化 + 处方」的组合：套用会同时切换顶部策略、分化方式、训练日，并清空当前周的手动改动。": "a goal + split + prescription bundle: applying switches goal, split and days, and clears manual edits.","算法假设：70% 蛋白来自肉类、55% 碳水来自主食、40% 脂肪来自烹调油，其余由乳制品/蛋/蔬菜/水果提供。": "Assumes 70% of protein from meat, 55% of carbs from staples, 40% of fat from cooking oil.","点动作右侧的「休 120s」就能开始倒计时，屏幕上会浮出一条计时条（可 +30s / 跳过），结束会响一声并震动。": "tap “Rest 120s” beside an exercise; a floating bar appears (+30s / skip) and it beeps and vibrates.","数据来源：USDA FoodData Central（公有领域 CC0）、中国食物成分表 第 6 版、ISSN 2017 蛋白摄入立场声明": "Sources: USDA FoodData Central (public domain, CC0), China Food Composition Tables 6th ed., ISSN 2017 protein stand.","RushFit 是一个单文件、纯本地的训练与营养工具：没有账号、没有服务器，所有记录只写进浏览器的 localStorage，不会上传任何数据。": "RushFit is a single-file, local-only training and nutrition tool: no account, no server, everything stays in localStorage.","删除": "Delete","套用": "Apply","换课": "Change","替换": "Swap","上移": "Move up","下移": "Move down","清空勾选": "Clear checks","添加动作": "Add exercise","加主食": "Add carbs","加蔬菜": "Add veg","加蛋白类": "Add protein","加脂肪": "Add fat","加蛋白": "Add protein","公式估算": "Formula (BMR × activity)","手表：直接填全天总消耗": "Watch: total daily burn","分项：静息 + 运动 + 非运动活动": "Split: RMR + exercise + NEAT","勾选即记录": "Checking a set logs it","训练部位": "Body part","哈克深蹲": "Hack squat","前蹲": "Front squat","史密斯深蹲": "Smith machine squat","行走箭步蹲": "Walking lunge","山羊挺身": "Back extension","坐姿腿弯举": "Seated leg curl","俯卧腿弯举": "Lying leg curl","上斜杠铃卧推": "Incline barbell press","俯卧撑": "Push-up","哑铃飞鸟": "Dumbbell fly","杠铃划船": "Barbell row","T 杠划船": "T-bar row","杠铃肩推": "Barbell overhead press","哑铃肩推": "Dumbbell shoulder press","反向飞鸟": "Reverse fly","杠铃弯举": "Barbell curl","锤式弯举": "Hammer curl","窄距卧推": "Close-grip bench","仰卧臂屈伸": "Lying triceps extension","农夫行走": "Farmer's carry","器械卷腹": "Machine crunch","绳索卷腹": "Cable crunch","设置": "Settings","语言": "Language","界面与术语": "Interface and terms","训练页": "Training page","营养页": "Nutrition page","已锁定": "Locked","未锁定": "Unlocked","已锁定 · 点一下解锁": "Locked — tap to unlock","按目标反推每餐的肉、主食、烹调油和添加糖上限，还能调碳水分配、每天几餐、主蛋白和主食。关掉就只剩配平器。": "Works back from your target to per-meal meat, staples, cooking oil and an added-sugar cap, plus carb timing, meals per day, main protein and staple. Turn it off and only the balancer stays.","背伸": "Back ext","负重行走": "Loaded carry","臂屈伸": "Extension","锁屏保活": "Keep timer alive","锁屏保活（可选）": "Keep timer alive (optional)","锁屏时循环一段几乎听不见的低频音，尽量让计时器继续跑；能否生效取决于手机，会多耗一点电。": "Loops a barely audible low tone so the timer can keep running with the screen off. Whether it works depends on the phone, and it uses a little more battery.","休息计时期间循环播放一段几乎听不见的低频音，尽量让系统不在锁屏后冻结页面，好让到点的提示音响出来。能否生效取决于手机与系统，代价是锁屏可能出现播放条、多耗一点电，默认关闭。": "Plays a barely audible low tone while resting so the system is less likely to freeze the page when the screen is off, giving the alert a chance to sound. Whether it works depends on the device. The trade-off: a media card may appear on the lock screen and it uses a little more battery. Off by default."};
+  "钠：快速记录会按食材自身含量自动累加（每 100 g 典型值）。": "Sodium: each quick add already contributes the food's own sodium (typical values per 100 g, same sources as above). ","盐、酱油、酱料不在食物库里": "Salt, soy sauce and condiments are not in the food list"," —— 在「钠」那行把调味料补进去：1 g 盐 ≈ 400 mg 钠，1 汤匙生抽 ≈ 1000 mg。直接改数字是覆盖，不是相加。": " — add them to the Sodium row: 1 g salt ≈ 400 mg sodium, 1 tbsp soy sauce ≈ 1000 mg. Typing a number replaces the value, it does not add to it.","分数 = 各项加权，每项 0–100 分：": "Score = weighted average of six items, each 0–100: ","0 不是没记，而是这项离目标太远": "0 does not mean \"not logged\" — it means that item is far from target","；钠需要记录才计分，「未记录」不扣分也不算满分。": "; sodium only counts once logged — \"not logged\" neither loses nor earns points.","未记录": "Not logged","今天几乎没吃，这是拉低分数的主因。": " — almost absent today, which is pulling the score down.","钠 mg": "Sodium mg","漂亮，今天很稳。": "Nice — steady day.","满分节奏，别改。": "Full marks. Do not change a thing.","这状态，保持住就行。": "This is the rhythm — just keep it.","不错，就差一点。": "Good, just a little short.","大方向对了，收个尾。": "Right direction — finish it off.","再补一点就到满分。": "A bit more and it is a perfect score.","加油，还差一口气。": "Almost there — one more push.","及格了，往前挪一步。": "You passed — now nudge it up.","差的不多，补上就行。": "Not far off. Top it up.","今天先这样，明天补回来。": "That is today. Catch up tomorrow.","别急，先吃口饭。": "No rush — go eat something first.","记录比分数重要，继续。": "Logging beats scoring. Keep going.","分数 = 蛋白 / 热量 / 碳水 / 脂肪 / 纤维 / 钠六项加权；吃少和吃多都扣分，钠需记录才计分。": "Score = weighted average of protein, calories, carbs, fat, fibre and sodium. Both undereating and overeating lose points; sodium only counts once logged.","钠": "Sodium","前束": "Front delt","超量": "over","超 ": "over ","删掉这条并从今日摄入扣掉": "Remove this entry and subtract it from today's intake","早餐不吃肉": "No meat at breakfast","今天吃过什么": "Eaten today","今天还没有记录": "Nothing logged yet","早餐吃肉": "Meat at breakfast","含肉": "Meat","不含肉": "No meat","营养评分": "Nutrition score","优秀": "Excellent","良好": "Good","一般": "Fair","待改善": "Needs work","动作部位注释": "Muscle tags","全局": "Global","条 · 合计": " entries · total ","最需要补 ": "Biggest gap: ","最需要控制 ": "Over target: ","现在只完成 ": "only ","已经到目标的 ": "at ","各项都在目标附近，保持住就行。": "Everything is near target. Keep it up.","吃少和吃多都扣分": "undereating and overeating both lose points","热量 训练日高 / 休息日低": "Calories: high on training days","热量 每天一致 · 高碳": "Calories: flat, high carb","热量 每天一致": "Calories: flat","还没有记录。用上面的「快速记录」选食物 + 克数点「加入」，这里会按时间顺序列出来，方便回看今天到底吃了什么。": "Nothing logged yet. Use Quick add above — every entry shows up here in order.","点 × 会删掉这条并从「今日摄入」里扣回去。如果你又手动改过上面的数字，以表格为准。": "× removes the entry and subtracts it from today's intake. If you also edited the numbers by hand, the table wins.","在每个动作名后面标出它练到的部位（主动肌 · 协同肌 · 稳定肌），按参与度排序。比如「面拉（后束 · 背 · 二头）」，不用再猜这个动作到底练哪儿。": "Shows the muscles each exercise targets (prime mover · synergists · stabilisers), ordered by contribution.","用「快速记录」加一条，或直接在下面表格里填数字，这里会按蛋白 / 热量 / 碳水 / 脂肪 / 纤维 / 钠六项算分。": "Add an entry with Quick add, or type numbers in the table below. The score covers protein, calories, carbs, fat, fibre and sodium.","三头": "Triceps","上周": "last week","上次": "Last","上胸": "Upper chest","下压": "pushdown","下腹": "Lower abs","个月": " months","中束": "Side delt","主项": "Main lift","主食": "Staples","二头": "Biceps","休息": "Rest","体重": "Weight","侧桥": "Side plank","侧链": "Obliques","保存": "Save","偏低": "low","偏高": "high","克数": "Grams","免责": "Disclaimer","全身": "Full body","其他": "Other","冷冻": "Frozen","减脂": "Cut","刚好": "on target","加入": "Add","包菜": "Cabbage","单腿": "single-leg","卷腹": "Crunch","取消": "Cancel","右腿": "Right leg","右臂": "Right arm","名称": "Name","后束": "Rear delt","后链": "Posterior chain","周均": "Weekly avg","土豆": "Potato","塑形": "Recomp","增肌": "Bulk","外展": "abduction","外旋": "external rotation","夹胸": "Chest fly","容量": "Volume","小腿": "Calves","就绪": "Ready","屈曲": "flexion","屈髋": "hip flexion","左腿": "Left leg","左臂": "Left arm","差额": "Gap","已补": "Added","年龄": "Age","开关": "toggle","弯举": "curl","手臂": "Arms","提踵": "calf raise","插件": "Plugins","收起": "Collapse","更多": "More","有氧": "Cardio","有氧类型": "Cardio type","本周": "This week","核心": "Core","模板": "Templates","横条": "Bars","正常": "normal","死虫": "Dead bug","水分": "Water","油脂": "Fats","清零": "Clear","热量": "Calories","牛肉": "Beef","番茄": "Tomato","目标": "Target","直臂": "straight-arm","碳水": "Carbs","米饭": "Rice","精力": "Energy","纤维": "Fiber","组间": "Rest","组（": " sets (","维持": "Maintain","股四": "Quads","肩袖": "Rotator cuff","胶囊": "Chips","脂肪": "Fat","腹直": "Abs","腿举": "Leg press","腿后": "Hamstrings","膝伸": "knee ext","膝屈": "knee flex","臀": "Glutes","臀推": "Hip thrust","自建": "Custom","自重": "BW","苹果": "Apple","营养": "Nutrition","蔬菜": "Veg","蛋白": "Protein","表现": "Performance","规格": "Spec","计划": "Plan","训练": "Train","记录": "Log","身高": "Height","躯干": "Torso","达成": "done","还差": "short","还有": "left","进度": "Progress","酸奶": "Yogurt","间接": "indirect","静息": "RMR","面拉": "Face pull","面条": "Noodles","饮水": "Water","首次": "First","香蕉": "Banana","香蕉（去皮）": "Banana (peeled)","鸡蛋": "Egg","默认": "Default","上一周": "Previous week","上一月": "Previous month","上下肢": "Upper/Lower","上肢拉": "Upper pull","上肢推": "Upper push","下一周": "Next week","下一月": "Next month","不力竭": "no failure","中等量": "moderate volume","主蛋白": "Main protein","仅详情": "Detail only","今天（": "Today (","仍不足": "still short","休息日": "Rest day","体水分": "Body water","体脂率": "Body fat %","依据：": "Basis: ","侧平举": "Lateral raise","周目标": "Weekly target","周计划": "Schedule","垂直拉": "Vertical pull","垂直推": "Vertical push","天到期": "days left","娃娃菜": "Baby cabbage","已保存": "Saved","已删除": "Deleted","已加入": "Added","已完成": "completed","已换成": "switched to","已清零": "cleared","已记录": "logged","已过期": "expired","已配平": "balanced","怎么用": "How to use","恢复日": "Rest day","扩展点": "Extension point","抗伸展": "anti-extension","抗侧屈": "anti-lateral flexion","拉为主": "pull-dominant","推为主": "push-dominant","推拉腿": "Push/Pull/Legs","无记录": "No record","日 –": " - ","有效期": "Valid for","有氧：": "Cardio: ","未填：": "Missing: ","未录入": "not set","植物油": "Vegetable oil","每次约": "about","水平拉": "Horizontal pull","水平推": "Horizontal push","燕麦片": "Oats","瘦体重": "Lean mass","白砂糖": "White sugar","糖 g": "Sugar g","练/周": " sessions/wk","组 ·": " sets ·","继续？": "continue?","肌肉量": "Muscle mass","背二头": "Back & biceps","胡萝卜": "Carrot","脂肪量": "Fat mass","腿屈伸": "Leg extension","腿弯举": "Leg curl","自定义": "Custom","营养素": "Nutrient","蛋白类": "protein foods","蛋白粉": "Whey powder","蛋白质": "Protein","西兰花": "Broccoli","训练日": "Training day","许可证": "License","调整「": "Adjust “","蹲主导": "squat-led","髋主导": "hip-led","髋铰链": "hip hinge","高容量": "high volume","高密度": "high density","魔芋爽": "Konjac snack","鸡胸肉": "Chicken breast","）蛋白": ") protein","，脂肪": ", fat","↑ 可试": "↑ try","」类动作": "“ exercises","上周均值": "Last week avg","上肢 A": "Upper A","上肢 B": "Upper B","下肢 A": "Lower A","下肢 B": "Lower B","下肢前链": "Lower anterior chain","下肢后链": "Lower posterior chain","个训练日": " training days","今天碳水": "Carbs today","今天要吃": "Eat today","今日摄入": "Today's intake","传统硬拉": "Conventional deadlift","低碳高脂": "low-carb, high-fat","低脂夸克": "Low-fat quark","全周一致": "Flat all week","全周同碳": "Same carbs daily","全周高碳": "High carb all week","全身 A": "Full body A","全身 B": "Full body B","全身 ·": "Full body ·","全部清零": "Clear all","全麦面包": "Whole-wheat bread","关于 ·": "About ·","其他动作": "Other exercises","冰岛酸奶": "Skyr","分化方式": "Split","力量优先": "strength-first","包装标示": "label","只换课表": "Split only","同类动作": "Similar exercises","哑铃卧推": "Dumbbell bench","哑铃弯举": "Dumbbell curl","器械推胸": "Machine chest press","回到本月": "This month","坐姿划船": "Seated row","坐姿提踵": "Seated calf raise","基础代谢": "BMR","备份 ·": "Backup ·","存为模板": "Save as template","导入备份": "Import","导出备份": "Export","展开全部": "Show all","已套用「": "Applied “","已添加「": "Added “","已设为「": "Set to “","平板支撑": "Plank","引体向上": "Pull-up","悬垂举腿": "Hanging leg raise","我的模板": "My templates","我的课表": "My schedule","手动输入": "Manual entry","按干重称": "weigh dry","按熟重称": "weigh cooked","排课设置": "Schedule setup","推荐 ·": "Recommended ·","提高精力": "Energy","最近记录": "Latest entry","本周容量": "Weekly volume","本周已有": "This week has","本周总量": "Weekly tonnage","杠铃卧推": "Barbell bench","杠铃深蹲": "Barbell squat","模板名称": "Template name","每天几餐": "Meals per day","活动系数": "Activity factor","深蹲为主": "squat-focused","混合坚果": "Mixed nuts","生，去壳": "raw, shelled","直臂下压": "Straight-arm pulldown","碳水 g": "Carbs g","碳水分配": "Carb timing","站姿提踵": "Standing calf raise","纤维 g": "Fiber g","练/周（": " sessions/wk (","绳索下压": "Cable pushdown","缺口换算": "gap math","肌肉蛋白": "Muscle protein","股四/臀": "Quads/Glutes","胸/三头": "Chest/Triceps","胸托划船": "Chest-supported row","胸肩三头": "Chest, delts, triceps","脂肪 g": "Fat g","脂肪指数": "FMI","膳食纤维": "Dietary fiber","自动配平": "Auto-balance","自由训练": "Freestyle","蛋白 g": "Protein g","训练法库": "Method library","该更新了": "needs update","身体数据": "Body data","身体模型": "Body model","运动表现": "Performance","配平后：": "After balancing: ","食材管理": "Manage foods","饮水记录": "Water log","（今天）": " (today)","＋ 运动": "+ exercise","」策略生成": "“ strategy","上下肢分化": "Upper/Lower","个动作 ·": " exercises ·","休息日 ·": "Rest day ·","休息日脂肪": "Rest fat","低于目标：": "Below target: ","体重来源：": "Weight source: ","六角杠硬拉": "Trap-bar deadlift","卡片上的「": "The “","双杠臂屈伸": "Dips","同类动作（": "Similar exercises (","哑铃侧平举": "Dumbbell lateral raise","在顶部切换": "switch at the top","坐姿臀外展": "Seated hip abduction","已安装插件": "Installed plugins","已导入备份": "Backup imported","已导出备份": "Backup exported","弹力带外旋": "Band external rotation","当前策略：": "Current strategy: ","改为休息日": "Make rest day","改为训练日": "Make training day","未填体水分": "no body water","未填体脂率": "no body fat","本周还没排": "not scheduled yet","添加糖上限": "Added sugar cap","空白训练日": "Blank session","自己写": "Write your own","训练日 ·": "Training day ·","训练日脂肪": "Training fat","训练日高碳": "High carb on training days","还差一点：": "Almost there: ","顺序已保存": "Order saved","高脚杯深蹲": "Goblet squat","g　|　蛋白": "g | protein","上斜哑铃卧推": "Incline dumbbell press","低碳高脂 ·": "low-carb high-fat ·","全周高碳 ·": "high carb all week ·","包装标示均值": "label average","匹配当前目标": "matches current goal","单臂哑铃划船": "One-arm dumbbell row","双腿（单侧）": "Legs (each)","宽握高位下拉": "Wide-grip pulldown","已套用到本周": "Applied to this week","开关即时生效": "toggles apply instantly","按计划重量起": "start at planned weight","改完立即重算": "recalculates instantly","最小有效剂量": "minimum effective dose","每周 1 练": "1 session/week","每周训练次数": "Sessions per week","每天该吃多少": "Daily portions","每肌群周容量": "Weekly volume by muscle","点锁图标解锁": "tap the lock to unlock","目标 17%": "Target 17%","窄距高位下拉": "Close-grip pulldown","策略已切换：": "Strategy switched: ","罗马尼亚硬拉": "Romanian deadlift","肌肉量 kg": "Muscle mass kg","训练法库 ·": "Method library ·","课表已换成「": "Schedule switched to “","这节课练什么": "What to train","+ 自定义食材": "+ Custom food","kcal 目标": "kcal target","上下肢 4 练": "Upper/Lower 4x","今日 TDEE": "TDEE today","以后不再推荐「": "Never suggest “","体重 − 脂肪": "weight − fat","例如 2450": "e.g. 2450","保加利亚分腿蹲": "Bulgarian split squat","其余在区间内。": "the rest are in range.","周均 TDEE": "Weekly avg TDEE","周训练总量趋势": "Weekly tonnage trend","在本文件末尾的": "append to the end of","已吃 / 应吃": "Eaten / Target","已清空当天勾选": "Cleared today's checks","当前缺口：蛋白": "Current gap: protein","按目标排序 ·": "sorted by goal ·","按目标补齐组数": "Fill sets to target","推拉腿 4 练": "PPL 4x","推拉腿 5 练": "PPL 5x","改完立刻生效。": "Applies immediately.","普通 3.5%": "Regular 3.5%","次记录取均值）": " entries averaged)","每肌群每周组数": "sets per muscle per week","活动消耗怎么算": "How activity is estimated","热量 kcal": "Calories kcal","烹调油 / 天": "Oil / day","由目标反推份量": "portions from your target","硬拉 + 单腿": "Deadlift + single-leg","组间休息计时器": "Rest timer","考试周保底 ·": "Exam-week minimum ·","股四 + 后链": "Quads + posterior","训练日高亮 ·": "training days highlighted ·","请输入合理体重": "Enter a realistic weight","走路 + 早睡": "Walk + sleep early","需要先填体脂率": "body fat % required first","一种食材吃到上限": "one food hitting its cap","今晨空腹体重记录": "This morning's fasted weight","休息日 TDEE": "Rest-day TDEE","休息日只算前一半": "rest days only get the first half","体重均值驱动 ·": "driven by average weight ·","先给食材起个名字": "Give the food a name first","全身 2 练 ·": "Full body 2x ·","全身 3 练 ·": "Full body 3x ·","减脂增肌同时进行": "fat loss and muscle gain at once","存一次复用三个月": "save once, reuse for 3 months","改一个数全部重算": "change one number, everything recalculates","每肌群周容量 ·": "weekly volume by muscle ·","每肌群周组数 ·": "weekly sets per muscle ·","睡眠 7.5 h": "Sleep 7.5 h","约 50 g/个": "~50 g each","色条是当天完成度": "the bar is that day's completion","训练日 TDEE": "Training-day TDEE","还差什么，怎么补": "What's missing, how to fix","1 包约 20 g": "~20 g per pack","★ 是你当前的目标": "★ marks your current goal","」，目标与吃法没动": "“, goal and diet unchanged","上下肢 4 练 ·": "Upper/Lower 4x ·","今天不做力量训练。": "No lifting today.","全身 A/B 交替": "Full body A/B","同肌群，换个模式（": "Same muscle, different pattern (","已吃 / 应吃 ·": "Eaten / Target ·","手表近 7 天均值": "7-day watch average","推 / 拉 / 腿": "Push / Pull / Legs","数据只在这台设备上": "data stays on this device","由身体模型 + 「": "from body model + “","运动之外的活动强度": "Activity outside training","还没有保存的模板。": "No saved templates yet.","），插件可以直接读": "), plugins can read","休息结束，可以开始了": "Rest over — go","你已经设置了不推荐「": "You excluded “","全周高碳（脂肪最低）": "High carb all week (lowest fat)","按 10% 冰衣折算": "glaze-adjusted by 10%","目标 2000 ml": "target 2000 ml","训练记录里的活动热量": "exercise calories from your watch","里追加即可，插槽可选": "; slots are","钠含量很高，容易水肿": "very high sodium, causes water retention","锁定后配平不改这个数": "locked: balancing won't change it","（已吃 / 应吃）·": "(eaten / target) ·","，所以两天天然不同。": ", so the two days differ naturally.","」类，所以这里不显示。": "“ category, so it is hidden here.","中国食物成分表 第6版": "China Food Composition Tables (6th ed.)","体力工作 + 高频训练": "Manual labour + frequent training","只看体重会以为没效果。": "judging by weight alone looks like nothing happened.","改了克数就会自动锁定；": "editing grams locks that food;","绿色是缺口，红色是超标": "green = gap left, red = over","至少保留 2 个训练日": "keep at least 2 training days","训练日高 / 休息日低": "High on training days / low on rest days","走路 8000 步 ·": "8,000 steps ·","默认三个月需要复查一次": "3 months by default, then review","上下肢 4 练 + 快走": "Upper/Lower 4x + walking","导出失败，换个浏览器试试": "Export failed — try another browser","推拉腿 3 练 + 骑车": "PPL 3x + cycling","点动作旁的「休」直接开始": "tap “Rest” next to an exercise to start","这类食材都已经在列表里了": "all foods in this category are already listed","，建议每周导出一次备份。": "; export a backup weekly.","2 练 + 1 次轻量全身": "2 sessions + 1 light full body","81%，25 g=2 平勺": "81%, 25 g = 2 level scoops","上下肢 4 练 + 立定跳": "Upper/Lower 4x + broad jumps","久坐 + 每周 1–2 练": "Sedentary + 1–2 sessions/wk","全身 2 练 + 每天走路": "Full body 2x + daily walking","关掉就不再出现在周计划里。": "turn it off and it disappears from the schedule.","减量减的是组数，不是强度；": "cut sets, not load;","分段肌肉量（体脂秤，kg）": "Segmental muscle (scale, kg)","力量 4 练 + 爆发模块": "Strength 4x + power block","想看到清晰腹肌，男性通常要": "Visible abs usually need","自己加动作，适合想试新计划": "add your own exercises; good for experimenting","这个动作今天已经在清单里了": "that exercise is already in today's list","颜色 = 分段相对参考区间": "colour = segment vs reference range","2 × 20 min 低强度": "2 × 20 min easy","与力量课分开，或放在非训练日": "separate from lifting, or on rest days","参与配平的食材（点一下开关）": "Foods in the pool (tap to toggle)","完整数据在下方训练日详情里。": "full details are in the day panel below.","已保存，默认三个月后提醒复查": "saved; review reminder in 3 months","快速记录（选食物 + 克数）": "Quick log (food + grams)","手表：今天运动消耗 kcal": "Watch: exercise kcal today","按包装毛重称会低估约 10%": "weighing with glaze underestimates by ~10%","推拉腿 4 练 + 有氧分开": "PPL 4x + separate cardio","明确制造热量缺口，体重会掉。": "a clear calorie deficit; weight will fall.","水平向和垂直向各留一个动作。": "keep one horizontal and one vertical movement.","碳水恒定能减少日间精力波动；": "steady carbs reduce energy swings;","调整顺序 / 删除自定义食材": "Reorder / delete custom foods","默认有效三个月，到期会标黄。": "valid 3 months by default, then highlighted.","中国食物成分表 第6版（近似）": "China Food Composition Tables (6th ed., approx.)","休息日低碳是可选优化，不是必需": "low-carb rest days are optional, not required","保持频率，把有氧放在非训练日。": "keep frequency, put cardio on rest days.","当前目标的方法排最前，带 ★。": "methods for your goal come first, marked ★.","日常走动多（校区通勤、常站着）": "Mostly on your feet (campus, standing)","早餐蛋白 35 g+，睡眠优先": "35 g+ protein at breakfast; sleep first","每周加 2 次 20 分钟快走": "add 2 × 20 min brisk walks per week","源码与反馈见仓库 README": "source and feedback in the repo README","热量留空会按 4/9/4 估算": "leave kcal blank to estimate with 4/9/4","练的那天和不练的那天热量不一样": "training and rest days differ in calories","不制造缺口，碳水日间波动最小化；": "no deficit, minimal day-to-day carb swing;","久坐为主（教室/图书馆/电脑前）": "Mostly seated (class, library, desk)","体力工作 / 每天 1 万步以上": "Manual work / 10k+ steps a day","例如：鸡胸肉罐头 / 食堂红烧肉": "e.g. canned chicken / cafeteria braised pork","保证一周总量不变、但每天数值不同": "weekly total unchanged, daily values differ","包装营养成分表（每 100 g）": "Nutrition label (per 100 g)","只改分化与训练日，不动目标和吃法": "changes split and days only — not goal or diet","已经没有可加的了，试试换一个分化": "nothing left to add — try another split","校正值，18–20 为训练者区间": "adjusted; 18–20 is the trained range","每天走动多 + 每周 4–5 练": "Active days + 4–5 sessions/wk","适合课业重、白天容易掉电的阶段。": "for heavy coursework and afternoon crashes.","长按拖动排序，左滑显示替换/删除": "long-press to reorder, swipe left for swap/delete","高频分化，适合恢复能力好的阶段。": "high frequency, for when recovery is good.","上课、上班时间不固定时的默认选择。": "the default when class and work hours vary.","不减不增，先把吃、睡、练稳定下来。": "no deficit, no surplus — stabilise food, sleep, training.","代价是脂肪偏低，坚果和油要按量吃。": "the trade-off is low fat; measure nuts and oil.","体重几乎不变，脂肪变少、肌肉变多。": "weight barely moves; fat down, muscle up.","复合动作的间接刺激按 0.5 组计": "compound carry-over counts as 0.5 set","导入会覆盖当前全部记录，确定继续？": "importing overwrites all current records. Continue?","缺口靠吃、有氧省时间、力量保肌肉；": "deficit from food, cardio saves time, lifting keeps muscle;","这个文件不像是 RushFit 的备份": "that file is not a RushFit backup","，渲染时会自动调用 render。": "; render is called automatically.","体重稳定，重点放在动作质量和训练容量": "weight stable; focus on technique and total volume","换浏览器、清理缓存或卸载都可能丢数据": "Switching browsers, clearing cache or uninstalling loses data","称重口径：肉为生重，米饭面条为熟重。": "Weigh meat raw, rice and noodles cooked.","第三次只做 3 个主项，各 2 组。": "the third session is 3 main lifts × 2 sets.","默认有效期三个月，到期会提醒你复查。": "valid 3 months by default, then you are reminded.","1–2 × 20 min，别排在练腿日": "1–2 × 20 min, not on leg day","FFMI 按瘦体重计算（含身高校正）；": "FFMI uses lean mass (height-adjusted);","全身 3 练 + 有氧 150 min": "Full body 3x + 150 min cardio","力量不降，有氧单独安排，缺口靠吃制造。": "keep loads, schedule cardio separately, eat the deficit.","导出为完整 JSON，换手机时导入即可": "full JSON export; import it on a new phone","手表：近 7 天平均「总消耗」kcal": "Watch: 7-day average total kcal","日常走动 + 每周 3–4 练（推荐）": "Active days + 3–4 sessions/wk (recommended)","每个动作先给 1 组，练几组记几组 ·": "one set per exercise to start; log what you do ·","现在没有选中任何食材，所以算不出方案。": "no foods selected, so there is nothing to solve.","上肢/下肢交替，单次动作少，练完不太累。": "upper/lower alternating, fewer lifts per session.","力量训练的热量估算误差常在 20–40%": "lifting calorie estimates are often off by 20–40%","同时训练对爆发力伤害最大，跑步大于骑车；": "concurrent training hurts power most; running > cycling;","主项 5 组 5 次，辅项 8–12 次。": "main lifts 5×5, accessories 8–12.","只保留 3 个动作，各 2 组，重量照旧。": "just 3 lifts × 2 sets, same loads.","插件 = 一个对象 + 一个 render": "a plugin = an object + a render","有氧单独排在非训练日，间隔 6 小时以上。": "cardio on rest days, 6+ hours apart.","每次一个模式，骑车比跑步更不干扰腿部恢复。": "one pattern per session; cycling interferes less.","水平向动作不能省（Wilson 2012）": "do not drop horizontal work (Wilson 2012)","缺口控制在 20% 以内，主项重量不许掉；": "keep the deficit under 20%; main lifts must not drop;","2 × 20–25 min 快走（中等强度）": "2 × 20–25 min brisk walk (moderate)","全身课把频率拉到 3 次，单次 6 个动作。": "full-body 3x, six lifts per session.","推/拉/腿循环，单次专注一个模式，动作数多。": "push/pull/legs rotation, one pattern per session.","数据全部存在 localStorage（键名": "everything lives in localStorage (key","方法卡上的「胸 / 背 / 腿 8–10」是": "the “chest / back / legs 8–10” on a card is","每动作 1–2 组、重量不变，重点是不退步。": "1–2 sets per lift, same load; the point is not regressing.","这天已经记过完成的组，换课会清空当天的勾选。": "sets are already logged today; changing the session clears them.","8 个肌群全部落在目标区间内，这一周不用再调。": "all 8 muscles are in range — nothing to adjust this week.","减脂期 2.0–2.2 g/kg 保瘦体重）。": "2.0–2.2 g/kg when cutting to protect lean mass).","强度掉了才是真掉（Spiering 2021）": "losing load is what real detraining looks like (Spiering 2021)","每肌群 14–18 组/周，主项 3–4 组。": "14–18 sets per muscle/week; main lifts 3–4 sets.","训练日 = 静息 × 日常活动 + 运动消耗；": "training day = RMR × activity + exercise;","做二次分析，比如导出 CSV、生成周报、接通知。": "for secondary analysis — CSV export, weekly reports, notifications.","每次课前 3–5 组跳跃，力量主项 3–6 次。": "3–5 sets of jumps before each session; main lifts 3–6 reps.","每肌群 12–14 组/周，配合小缺口和高蛋白。": "12–14 sets per muscle/week with a small deficit and high protein.","爆发力模块要放在课前，疲劳状态下练跳跃等于练耐力": "power work goes first; jumping while tired trains endurance","自定义食材（填每 100 g 的营养，包装上都有）": "Custom food (per 100 g — it is on the label)","课业最重时用，力量只到最低有效量，靠步数维持代谢。": "for the heaviest weeks: minimum effective lifting, steps for metabolism.","，套用后回到「周计划」能看到实际命中多少、差多少。": "; after applying, the schedule shows what you actually hit.","判断标准看三样：腰围下降、主项重量上涨、体脂率缓降；": "judge by three things: waist down, main lifts up, body fat slowly down;","有慢性病、正在用药、怀孕或受伤时，请先咨询专业人士。": "with a chronic condition, medication, pregnancy or injury, ask a professional first.","每天碳水都在 4.5–5 g/kg，不做低碳休息日。": "carbs stay at 4.5–5 g/kg every day — no low-carb rest days.","吃在维持线，体重不变，把时间花在动作质量和训练容量上。": "eat at maintenance, hold weight, spend time on technique and volume.","每周 150–250 min 快走/骑车，与力量课分开": "150–250 min/week walking or cycling, separate from lifting","注意这跟上面按肌群算的「本周容量（组数）」不是一回事。": "note this is not the same as the by-muscle set count above.","跑步对下肢力量的干扰大于骑车（Wilson 2012）": "running interferes with leg strength more than cycling (Wilson 2012)","减脂期降重量会让瘦体重掉得更快（Willis 2012）": "cutting load while dieting speeds lean-mass loss (Willis 2012)","当前 19% 先做 17%，是 8–10 周的现实目标。": "from 19% to 17% is a realistic 8–10 week goal.","，所以它只是身体模型的一个输入，不是消耗多少就吃回多少。": ", so it feeds the model — you do not eat back what you burn.","A/B 交替，每块肌肉每周 3 次刺激，单次 50 分钟。": "A/B alternating, each muscle 3× a week, 50 minutes a session.","套用到下一周：先把顶部周切换箭头点到下一周，再点「套用」。": "to apply to next week: arrow to it at the top, then press Apply.","身体模型优先用上周空腹体重的平均值，避免单日水分波动误导。": "the model prefers last week's average fasted weight to avoid water-noise.","重量按上次自动带入，次数取区间中值，组数不够就点「+ 组」": "weight carries over, reps default to the midpoint, add sets as you go","套用会同时切换目标策略、分化方式、训练日，并清空本周手动改动": "applying switches goal, split and days, and clears manual edits this week","轻微盈余、碳水优先，为训练强度和恢复服务，体型不是第一目标。": "a slight surplus, carbs first, serving intensity and recovery.","选完会按这节课的动作清单生成，已记录的勾选会保留在旧记录里。": "the session is generated from that template; existing logs stay in the old record.","训练日按顺序套用当前分化，休息日自动切换低碳/高脂的饮食目标。": "training days follow the split in order; rest days switch to low-carb/high-fat.","小米手表里找「消耗」或「活动+静息」的合计值，别只填运动那一项。": "on a Xiaomi watch use total calories, not just the workout entry.","小缺口 + 高蛋白 + 力量优先，腰围下降而体重几乎不动是正常的": "small deficit + high protein + strength first; waist down, weight flat","碳水优先，训练前 90 分钟补一份主食，练后 2 小时内吃够蛋白": "carbs first: a starch 90 min pre, protein within 2 h post","把下面食材的开关打开，或者用「+ 自定义食材」加一个你自己常吃的。": "turn on some foods below, or add one you actually eat.","蛋白区间依据 ISSN 立场声明（1.4–2.0 g/kg 维持；": "protein range follows the ISSN position stand (1.4–2.0 g/kg maintenance;","低强度有氧对疲劳感的改善大于中等强度（Puetz 2008 RCT）": "low-intensity cardio beat moderate for fatigue (Puetz 2008 RCT)","盈余 10–12%，每周涨 0.2–0.3 kg 就够，涨太快是脂肪": "10–12% surplus; 0.2–0.3 kg/week is enough — faster is fat","目标：8000 步以上、蛋白质不降、碳水降一档、睡前 7.5 小时。": "targets: 8,000+ steps, protein unchanged, carbs one notch down, 7.5 h sleep.","力量训练在缺口下保住瘦体重，有氧负责扩大缺口（Murphy 2022）": "lifting preserves lean mass in a deficit; cardio widens it (Murphy 2022)","按当前目标算每个肌群这周该做多少组、实际排了多少组，缺口可以一键补齐。": "weekly sets per muscle vs target, with one-tap catch-up.","缺数据不影响使用——体重在就能算，其余按默认值估算，营养模块照常工作。": "missing data is fine — weight is enough; the rest falls back to defaults.","蛋白拉到 2.2 g/kg 保住肌肉，力量和精力可能短期下滑，属正常。": "protein at 2.2 g/kg spares muscle; strength and energy may dip briefly.","就是\"减脂增肌同时进行\"（英文 body recomposition）。": "fat loss and muscle gain at the same time (body recomposition).","」只改分化与训练日，不动目标和吃法——已经定好吃法、只想换个练法时用这个。": "“ changes split and days only — use it when the diet is settled.","「存为模板」保存的是那一周的实际动作清单（含起始重量），适合固定课表的阶段。": "“Save as template” stores the actual exercise list with starting weights.","体脂秤上的 17.5 用的是另一套公式，两者不用互相对照，看自己的趋势即可。": "the scale's 17.5 uses another formula; track your own trend.","在「周计划」里点「存为模板」，就能把这一周的动作、组数、起始重量存下来复用。": "press “Save as template” in the schedule to reuse this week.","填周均值即可：系统会把训练日上调约 5%，休息日按「一周总量守恒」下调，所以": "enter a weekly average: training days +5%, rest days scaled down, so","每周 2 次以上频率优于 1 次（Schoenfeld 2016 meta）": "2+ sessions per muscle beat 1 (Schoenfeld 2016 meta)","中等强度对「疲劳感」的改善最好，强度过高或过低都变差（Wender 2022）": "moderate intensity helps fatigue most; too hard or too easy is worse (Wender 2022)","热量盈余 10–12%，体重缓慢上涨，力量和肌肉长得最快，但脂肪也会同步增加。": "10–12% surplus; weight climbs slowly, strength and muscle fastest, fat too.","同等容量下分化方式对增肌无显著差异，关键是总组数（Schoenfeld 2019）": "at equal volume, split choice barely matters — total sets do (Schoenfeld 2019)","垂直向训练补不上短距离冲刺和水平跳，两个方向都不能省（2023 力向量 meta）": "vertical work does not cover sprints or horizontal jumps (2023 force-vector meta)","小缺口 + 高容量 + 高蛋白，体重几乎不动而腰围下降（Barakat 2020）": "small deficit + high volume + high protein: waist down, weight flat (Barakat 2020)","已选食材加到各自份量上限也补不齐，加一种同类（不同食物，比如燕麦或面条）通常就够了。": "even at their caps these foods cannot close the gap; add another staple (oats, noodles).","运动消耗填 0 的话两天会一样，建议填 200–300（45–60 分钟力量训练）。": "with 0 exercise calories both days look the same; 200–300 fits 45–60 min of lifting.","1 kg 脂肪 ≈ 7700 kcal，所以每周 0.3–0.5 kg 是可持续速度。": "1 kg of fat ≈ 7,700 kcal, so 0.3–0.5 kg/week is sustainable.","短于 2 周的停训几乎不影响表现，但连续 4 周会明显掉（Spiering 2021）": "under 2 weeks off barely matters; 4 weeks does (Spiering 2021)","在周计划里显示本周与上周的总训练量（kg = 重量×次数×组数），防止“练了但没进步”。": "weekly vs last week tonnage (kg = load × reps × sets) so you notice stalls.","每周 2 次/肌群优于 1 次，更高频率需配合足够热量（Schoenfeld 2016）": "2×/week per muscle beats 1×; higher frequency needs enough calories (Schoenfeld 2016)","每天 8 杯（250 ml/杯）的打卡条，帮你把水分补够——影响力量、饱腹和体成分读数。": "8 × 250 ml checkboxes — hydration affects strength, satiety and readings.","这个系数是「一周平均」，系统会按你的训练次数自动拆成训练日（+5%）和休息日（等量下调），": "this factor is a weekly average; the app splits it into +5% training days and scaled rest days,","容量与频率是增肌主变量，单肌群超过约 10 组/周收益递减（Schoenfeld 2017）": "volume and frequency drive growth; beyond ~10 sets/muscle/week returns diminish (Schoenfeld 2017)","容量与频率是增肌主变量，约 10 组/肌群/周以上收益递减（Schoenfeld 2017）": "volume and frequency drive growth; above ~10 sets/muscle/week returns diminish (Schoenfeld 2017)","：本工具提供的是一般性训练与营养信息，不构成医疗建议，不能替代医生或注册营养师的诊断与处方。": ": general training and nutrition information, not medical advice; it does not replace a doctor or dietitian.","「全周高碳」会把脂肪压到 0.7 g/kg，适合上课上班时间不固定、没法在休息日刻意控碳的人；": "“High carb all week” pushes fat to 0.7 g/kg — for irregular schedules;","每周 1 次、每动作 1 组、重量不变可维持力量与肌肉 32 周（Spiering 2021）": "1×/week, 1 set per lift, same load holds strength and muscle for 32 weeks (Spiering 2021)","力量+有氧组体脂率和腰围降得最多，纯力量组甚至体重上升（Willis 2012 STRRIDE）": "lifting + cardio cut fat and waist most; lifting alone gained weight (Willis 2012 STRRIDE)","同时训练对爆发力伤害最大（ES 0.91→0.55），分开安排能减少干扰（Wilson 2012）": "concurrent training hurts power most (ES 0.91→0.55); separating helps (Wilson 2012)","每周 1 次、每动作 1 组、重量不变，就能维持力量与肌肉长达 32 周（Spiering 2021）": "1×/week, 1 set each, same load maintains strength and muscle for 32 weeks (Spiering 2021)","缺口约 500 kcal/天时瘦体重增长归零，300–400 才可能同时增肌（Murphy 2022）": "at ~500 kcal/day deficit lean gain stops; 300–400 allows recomp (Murphy 2022)","5–30 次只要接近力竭增肌相当，但 20% 1RM 组只涨 8.9%（Lasevicius 2018）": "5–30 reps near failure grow similarly, but 20% 1RM gained only 8.9% (Lasevicius 2018)","中等强度对精力的改善最好，练到力竭反而更累（Wender 2022，81 项 RCT / 7050 人）": "moderate intensity improves energy most; training to failure adds fatigue (Wender 2022)","是「目标 + 分化 + 处方」的组合：套用会同时切换顶部策略、分化方式、训练日，并清空当前周的手动改动。": "a goal + split + prescription bundle: applying switches goal, split and days, and clears manual edits.","算法假设：70% 蛋白来自肉类、55% 碳水来自主食、40% 脂肪来自烹调油，其余由乳制品/蛋/蔬菜/水果提供。": "Assumes 70% of protein from meat, 55% of carbs from staples, 40% of fat from cooking oil.","点动作右侧的「休 120s」就能开始倒计时，屏幕上会浮出一条计时条（可 +30s / 跳过），结束会响一声并震动。": "tap “Rest 120s” beside an exercise; a floating bar appears (+30s / skip) and it beeps and vibrates.","数据来源：USDA FoodData Central（公有领域 CC0）、中国食物成分表 第 6 版、ISSN 2017 蛋白摄入立场声明": "Sources: USDA FoodData Central (public domain, CC0), China Food Composition Tables 6th ed., ISSN 2017 protein stand.","RushFit 是一个单文件、纯本地的训练与营养工具：没有账号、没有服务器，所有记录只写进浏览器的 localStorage，不会上传任何数据。": "RushFit is a single-file, local-only training and nutrition tool: no account, no server, everything stays in localStorage.","删除": "Delete","套用": "Apply","换课": "Change","替换": "Swap","上移": "Move up","下移": "Move down","清空勾选": "Clear checks","添加动作": "Add exercise","加主食": "Add carbs","加蔬菜": "Add veg","加蛋白类": "Add protein","加脂肪": "Add fat","加蛋白": "Add protein","公式估算": "Formula (BMR × activity)","手表：直接填全天总消耗": "Watch: total daily burn","分项：静息 + 运动 + 非运动活动": "Split: RMR + exercise + NEAT","勾选即记录": "Checking a set logs it","训练部位": "Body part","哈克深蹲": "Hack squat","前蹲": "Front squat","史密斯深蹲": "Smith machine squat","行走箭步蹲": "Walking lunge","山羊挺身": "Back extension","坐姿腿弯举": "Seated leg curl","俯卧腿弯举": "Lying leg curl","上斜杠铃卧推": "Incline barbell press","俯卧撑": "Push-up","哑铃飞鸟": "Dumbbell fly","杠铃划船": "Barbell row","T 杠划船": "T-bar row","杠铃肩推": "Barbell overhead press","哑铃肩推": "Dumbbell shoulder press","反向飞鸟": "Reverse fly","杠铃弯举": "Barbell curl","锤式弯举": "Hammer curl","窄距卧推": "Close-grip bench","仰卧臂屈伸": "Lying triceps extension","农夫行走": "Farmer's carry","器械卷腹": "Machine crunch","绳索卷腹": "Cable crunch","下斜卧推": "Decline bench press","负重体侧屈": "Weighted side bend","坐姿腿内收": "Seated hip adduction","下胸": "Lower chest","侧屈": "side bend","内收": "adduction","大腿内收": "Adductors","有记录": "Logged","这天练过，记录还在": "Trained that day — records kept","设置": "Settings","语言": "Language","界面与术语": "Interface and terms","训练页": "Training page","营养页": "Nutrition page","已锁定": "Locked","未锁定": "Unlocked","已锁定 · 点一下解锁": "Locked — tap to unlock","按目标反推每餐的肉、主食、烹调油和添加糖上限，还能调碳水分配、每天几餐、主蛋白和主食。关掉就只剩配平器。": "Works back from your target to per-meal meat, staples, cooking oil and an added-sugar cap, plus carb timing, meals per day, main protein and staple. Turn it off and only the balancer stays.","背伸": "Back ext","负重行走": "Loaded carry","臂屈伸": "Extension","锁屏保活": "Keep timer alive","锁屏保活（可选）": "Keep timer alive (optional)","锁屏时循环一段几乎听不见的低频音，尽量让计时器继续跑；能否生效取决于手机，会多耗一点电。": "Loops a barely audible low tone so the timer can keep running with the screen off. Whether it works depends on the phone, and it uses a little more battery.","休息计时期间循环播放一段几乎听不见的低频音，尽量让系统不在锁屏后冻结页面，好让到点的提示音响出来。能否生效取决于手机与系统，代价是锁屏可能出现播放条、多耗一点电，默认关闭。": "Plays a barely audible low tone while resting so the system is less likely to freeze the page when the screen is off, giving the alert a chance to sound. Whether it works depends on the device. The trade-off: a media card may appear on the lock screen and it uses a little more battery. Off by default."};
 var EN_KEYS = null;
 /* 单字条目单独放：只会匹配到长词替换后剩下的字符 */
 var EN1 = {
@@ -1696,7 +1707,7 @@ function defaultState(){
           nutDate: iso(t), meals:3, meat:'chicken', carb:'rice', meatBf:true,
           chipEdit:false, addFood:false, replaceFor:null, qfFood:null,
           editGroup:null, editFoodId:null,
-          plugTab:'pack', capMode:'bar', pickSession:null, tplExpand:false }
+          plugTab:'pack', capMode:'bar', pickSession:null, tplExpand:false, howtoOpen:false }
   };
 }
 
@@ -1775,11 +1786,13 @@ function migrate(s){
     s.migr = 1;
   }
   if (!s.ui) s.ui = d.ui;
-  ['calMode','monthOffset','manageFoods','addFood','replaceFor','capMode','pickSession','tplExpand','plugTab','editGroup','editFoodId'].forEach(function(k){
+  ['calMode','monthOffset','manageFoods','addFood','replaceFor','capMode','pickSession','tplExpand','plugTab','editGroup','editFoodId','howtoOpen'].forEach(function(k){
     if (s.ui[k] === undefined) s.ui[k] = d.ui[k];
   });
   if (!s.ui.capMode) s.ui.capMode = 'bar';
   if (s.methodId === undefined) s.methodId = null;
+  /* 老存档没有 since：把当前周当作起点，之前的周不再按现行课表回算 */
+  if (!s.weekly.since) s.weekly.since = weekKeyOf(iso(new Date()));
   if (s.ui.meat === 'chicken_raw' || s.ui.meat === 'chicken_frozen') s.ui.meat = 'chicken';
   if (s.ui.carb === 'noodle_cooked' || s.ui.carb === 'noodle_dry') s.ui.carb = 'noodle';
   (s.templates||[]).forEach(function(t){ if (!t.months) t.months = 3; if (!t.created) t.created = iso(new Date()); });
@@ -1825,8 +1838,20 @@ function weekKeyOf(dateKey){ return iso(mondayOf(parse(dateKey))); }
 
 function dayPlan(dateKey){
   var wk = weekKeyOf(dateKey);
+  var di = dayIdxOf(dateKey);
+  var ov = S.plans[wk] || {};
+  if (ov[di]) return ov[di];                 /* 手动改过的那一天优先 */
+  /* 套用课表 / 改训练日之前的日期：不拿当前模板回算，避免「过去被改写」 */
+  if (S.weekly.since && dateKey < S.weekly.since) return { type:'rest' };
   var plan = planForWeek(wk);
-  return plan[dayIdxOf(dateKey)] || { type:'rest' };
+  return plan[di] || { type:'rest' };
+}
+
+/* 套用课表、换分化、改训练日时调用：从本周起生效，之前的周保持原样 */
+function bumpScheduleSince(){
+  if (!S.weekly) return;
+  var mon = weekKeyOf(iso(new Date()));
+  if (!S.weekly.since || S.weekly.since < mon) S.weekly.since = mon;
 }
 
 function isTrainingDate(dateKey){ return dayPlan(dateKey).type === 'train'; }
@@ -2203,6 +2228,8 @@ function repMid(reps){
 function ensureLog(dateKey){
   var plan = dayPlan(dateKey);
   var log = logOf(dateKey);
+  /* 导入的历史记录不按当前周计划补动作，否则会把今天的课表塞进过去 */
+  if (log.imported) return log;
   if (plan.type !== 'train') return log;
   plan.exercises.forEach(function (pe) {
     var it = null;
@@ -2599,7 +2626,6 @@ registerPlugin({
         '<div class="rt-hint">主项 ' + pres.rest + 's · RIR ' + pres.rir + ' · 点动作旁的「休」直接开始</div>' +
         '<label class="rt-keep"><input type="checkbox" id="rtKeep"' + (S.plugs.restKeep ? ' checked' : '') + '>' +
           '<span class="rt-keep-t">锁屏保活（可选）</span>' +
-          '<span class="rt-keep-s">锁屏时循环一段几乎听不见的低频音，尽量让计时器继续跑；能否生效取决于手机，会多耗一点电。</span>' +
         '</label>' +
       '</div>';
     restBarSync();
@@ -3074,8 +3100,8 @@ function viewWeek(){
   html += '<div class="slot" data-slot="week"></div>';
 
   if (S.ui.calMode !== 'month'){
-    var plan = planForWeek(iso(mon));
-    html += dayPanel(iso(mon), weekDatesOf(mon)[S.ui.day], plan[S.ui.day] || {type:'rest'});
+    var dk0 = weekDatesOf(mon)[S.ui.day];
+    html += dayPanel(iso(mon), dk0, dayPlan(dk0));
   }
   if (S.ui.replaceFor) html += replaceSheet();
   if (S.ui.pickSession) html += pickSessionSheet();
@@ -3225,21 +3251,38 @@ function weekGrid(){
   var plan = planForWeek(wkKey);
   var html = '<div class="week-grid">';
   dates.forEach(function (d, i) {
-    var dp = plan[i] || { type:'rest' };
+    var dp = dayPlan(d);
     var pr = dayProgress(d);
+    var lg = S.logs[d];
+    var hasLog = !!(lg && lg.items && lg.items.length);
+    var isTrain = dp.type === 'train';
+    var trainLike = isTrain || hasLog;          /* 有记录的日子按训练日卡片显示 */
     var isSel = S.ui.day === i;
     var isToday = d === tKey;
-    var cls = 'day-card ' + (dp.type==='train'?'is-train':'is-rest') + (isSel?' sel':'') + (isToday?' today':'');
+    var cls = 'day-card ' + (trainLike?'is-train':'is-rest') + (isSel?' sel':'') + (isToday?' today':'');
     html += '<div class="' + cls + '" data-action="selectDay" data-i="' + i + '">';
     html += '<div class="day-top"><div><div class="day-dow">周' + WEEK_CN[i] + '</div>' +
             '<div class="day-date num">' + parse(d).getDate() + (isToday?'<span class="dot-today"></span>':'') + '</div></div>' +
-            '<span class="day-badge ' + (dp.type==='train'?'train':'rest') + '">' + (dp.type==='train'?'训练':'休息') + '</span></div>';
-    if (dp.type === 'train'){
-      html += '<div class="day-title">' + h(dp.title) + '</div>';
-      html += '<div class="day-list">' + dp.exercises.slice(0,4).map(function(e){ return h(e.name); }).join(' · ') +
-              (dp.exercises.length>4?' 等 '+dp.exercises.length+' 项':'') + '</div>';
-      html += '<div class="day-foot"><div class="mring" style="--p:' + pr.pct + '"></div>' +
-              '<span class="day-pct">' + pr.done + '/' + pr.total + ' 组</span></div>';
+            '<span class="day-badge ' + (trainLike?'train':'rest') + '">' + (trainLike?'训练':'休息') + '</span></div>';
+    if (trainLike){
+      var names, done = 0, total = 0, title;
+      if (isTrain){
+        title = dp.title;
+        names = dp.exercises;
+        done = pr.done; total = pr.total;
+      } else {
+        /* 没套模板的那天：不显示模板名，只按实际记录列动作 */
+        title = '自由训练';
+        names = lg.items;
+        lg.items.forEach(function (it) {
+          (it.sets || []).forEach(function (s) { total++; if (s.done) done++; });
+        });
+      }
+      html += '<div class="day-title">' + h(title) + '</div>';
+      html += '<div class="day-list">' + names.slice(0,4).map(function(e){ return h(e.name); }).join(' · ') +
+              (names.length>4?' 等 '+names.length+' 项':'') + '</div>';
+      html += '<div class="day-foot"><div class="mring" style="--p:' + (total ? Math.round(done/total*100) : 0) + '"></div>' +
+              '<span class="day-pct">' + done + '/' + total + ' 组</span></div>';
     } else {
       html += '<div class="day-title" style="color:var(--ink-3)">恢复日</div>';
       html += '<div class="day-list">走路 8000 步 · 睡眠 7.5 h</div>';
@@ -3365,19 +3408,26 @@ function dayPanel(wkKey, dateKey, dp){
   var html = '<div class="card day-panel"><div class="card-bd">';
   html += '<div class="dp-head"><div class="dp-title">';
   html += '<h3>' + (d.getMonth()+1) + ' 月 ' + d.getDate() + ' 日 · 周' + WEEK_CN[dayIdxOf(dateKey)] + '</h3>';
-  html += dp.type === 'train'
-    ? '<span class="chip train">训练日</span><span class="muted" style="font-size:12.5px">' + h(dp.title) + ' · ' + h(dp.tag||'') + '</span>'
+  /* 休息日也可能有记录（导入的历史训练、手动补记），按训练日样式显示，但不套模板名 */
+  var log0 = logOf(dateKey);
+  var hasLog = !!(log0.items && log0.items.length);
+  var isTrain = dp.type === 'train';
+  var trainLike = isTrain || hasLog;
+
+  html += trainLike
+    ? '<span class="chip train">训练日</span><span class="muted" style="font-size:12.5px">' +
+      (isTrain ? h(dp.title) + ' · ' + h(dp.tag||'') : '自由训练') + '</span>'
     : '<span class="chip rest">休息日</span><span class="muted" style="font-size:12.5px">低碳高脂 · 走路 + 早睡</span>';
   html += '</div><div class="wk-actions">';
-  html += '<button class="btn sm ghost" data-action="flipDay" data-date="' + dateKey + '">' + (dp.type==='train'?'改为休息日':'改为训练日') + '</button>';
-  if (dp.type === 'train') html += '<button class="btn sm ghost" data-action="pickSession" data-date="' + dateKey + '">换课</button>';
-  if (dp.type === 'train') html += '<button class="btn sm ghost danger" data-action="resetSets" data-date="' + dateKey + '">清空勾选</button>';
+  html += '<button class="btn sm ghost" data-action="flipDay" data-date="' + dateKey + '">' + (isTrain?'改为休息日':'改为训练日') + '</button>';
+  if (trainLike) html += '<button class="btn sm ghost" data-action="pickSession" data-date="' + dateKey + '">换课</button>';
+  if (trainLike) html += '<button class="btn sm ghost danger" data-action="resetSets" data-date="' + dateKey + '">清空勾选</button>';
   html += '</div></div>';
 
-  if (dp.type === 'train'){
+  if (trainLike){
     var pres = prescFor(S.goal);
     var log = ensureLog(dateKey);
-    if (S.ui.capMode === 'off' && S.plugs.muscleVolume){
+    if (isTrain && S.ui.capMode === 'off' && S.plugs.muscleVolume){
       var dmx = dayMuscleMix(dateKey);
       var chipsD = MUSCLE_GROUPS.filter(function(g){ return dmx[g.id].d > 0; }).map(function(g){
         var tg = pres[g.id], st = capState(effSets(dmx[g.id]), tg);
@@ -3388,7 +3438,7 @@ function dayPanel(wkKey, dateKey, dp){
     }
     html += '<div class="ex-wrap">';
     log.items.forEach(function (it, ei) {
-      var pe = dp.exercises.filter(function (x) { return x.name === it.name; })[0] || { sets: it.sets.length, reps:'—', w:0 };
+      var pe = (dp.exercises || []).filter(function (x) { return x.name === it.name; })[0] || { sets: it.sets.length, reps:'—', w:0 };
       var allDone = it.sets.length && it.sets.every(function(s){ return s.done; });
       var last = lastPerf(it.name, dateKey);
       var lastTxt = '<span class="lbl">首次</span>按计划重量起';
@@ -3415,7 +3465,7 @@ function dayPanel(wkKey, dateKey, dp){
       html += '<div class="ex-namewrap"><div class="ex-name">' + h(it.name) +
               (S.plugs.exParts ? '<span class="ex-parts">（' + h(partsOf(it.name)) + '）</span>' : '') + '</div>' +
               '<div class="ex-last">' + lastTxt + '</div></div>';
-      html += '<div class="ex-plan">' + pe.sets + ' × ' + h(pe.reps) + '<small>计划</small></div>';
+      if (isTrain) html += '<div class="ex-plan">' + pe.sets + ' × ' + h(pe.reps) + '<small>计划</small></div>';
       html += '<button class="more" data-action="exMenu" data-ex="' + ei + '" data-date="' + dateKey + '" aria-label="更多">⋯</button>';
       html += '</div>';
       html += '<div class="ex-row2">';
@@ -4233,14 +4283,22 @@ function viewTemplates(){
   }
   html += '</div></div>';
 
-  html += '<div class="card" style="margin-top:16px"><div class="card-hd"><h3>怎么用</h3></div><div class="card-bd">' +
-    '<ol style="font-size:13px;color:var(--ink-2);margin:0;padding-left:18px;line-height:1.9">' +
-    '<li><b>训练法库</b>是「目标 + 分化 + 处方」的组合：套用会同时切换顶部策略、分化方式、训练日，并清空当前周的手动改动。当前目标的方法排最前，带 ★。</li>' +
-    '<li>方法卡上的「胸 / 背 / 腿 8–10」是<b>每肌群每周组数</b>，套用后回到「周计划」能看到实际命中多少、差多少。</li>' +
-    '<li>卡片上的「<b>只换课表</b>」只改分化与训练日，不动目标和吃法——已经定好吃法、只想换个练法时用这个。</li>' +
-    '<li>「存为模板」保存的是那一周的实际动作清单（含起始重量），适合固定课表的阶段。默认有效三个月，到期会标黄。</li>' +
-    '<li>套用到下一周：先把顶部周切换箭头点到下一周，再点「套用」。</li>' +
-    '</ol></div></div>';
+  /* 「怎么用」改成点击展开：默认只占一行，点开才显示说明 */
+  var howOpen = !!S.ui.howtoOpen;
+  html += '<div class="card howto' + (howOpen ? ' open' : '') + '" style="margin-top:16px">' +
+    '<button class="howto-hd" data-action="howtoToggle" aria-expanded="' + (howOpen ? 'true' : 'false') + '">' +
+      '<span class="howto-title">怎么用</span>' +
+      '<span class="howto-chev" aria-hidden="true">' + (howOpen ? '−' : '+') + '</span>' +
+    '</button>' +
+    (howOpen ? '<div class="card-bd">' +
+      '<ol style="font-size:13px;color:var(--ink-2);margin:0;padding-left:18px;line-height:1.9">' +
+      '<li><b>训练法库</b>是「目标 + 分化 + 处方」的组合：套用会同时切换顶部策略、分化方式、训练日，并清空当前周的手动改动。当前目标的方法排最前，带 ★。</li>' +
+      '<li>方法卡上的「胸 / 背 / 腿 8–10」是<b>每肌群每周组数</b>，套用后回到「周计划」能看到实际命中多少、差多少。</li>' +
+      '<li>卡片上的「<b>只换课表</b>」只改分化与训练日，不动目标和吃法——已经定好吃法、只想换个练法时用这个。</li>' +
+      '<li>「存为模板」保存的是那一周的实际动作清单（含起始重量），适合固定课表的阶段。默认有效三个月，到期会标黄。</li>' +
+      '<li>套用到下一周：先把顶部周切换箭头点到下一周，再点「套用」。</li>' +
+      '</ol></div>' : '') +
+    '</div>';
   return html;
 }
 
@@ -4280,7 +4338,7 @@ function packNum(obj, keys){
 }
 
 function applyPack(data){
-  var res = { body:0, foods:0, weights:0 };
+  var res = { body:0, foods:0, weights:0, days:0, moves:0, skipped:0 };
   if (!S.profile) S.profile = {};
   if (!Array.isArray(S.customFoods)) S.customFoods = [];
   if (!Array.isArray(S.foodsOn)) S.foodsOn = [];
@@ -4366,6 +4424,47 @@ function applyPack(data){
     Object.keys(ws).forEach(function (k) { putW(k, ws[k]); });
   }
   if (latest) S.profile.weight = latest.kg;   /* 身体模型取最新一次体重 */
+
+  /* ---- 4) 训练记录：只写名单里的日期；那天已经有记录就整日跳过，绝不合并/覆盖 ---- */
+  var wks = data.workouts || data.training || data.workoutLog || data['训练记录'] || null;  if (Array.isArray(wks)){
+    if (!S.logs) S.logs = {};
+    wks.forEach(function (day) {
+      if (!day || typeof day !== 'object') return;
+      var dk = String(day.date || day.day || day['日期'] || '').slice(0, 10);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(dk)) return;
+      var inItems = Array.isArray(day.items) ? day.items : (Array.isArray(day.exercises) ? day.exercises : []);
+      if (!inItems.length) return;
+      var cur = S.logs[dk];
+      if (cur && Array.isArray(cur.items) && cur.items.length){ res.skipped++; return; }
+
+      var items = [];
+      inItems.forEach(function (it) {
+        if (!it || typeof it !== 'object') return;
+        var nm = String(it.name != null ? it.name : (it.exercise != null ? it.exercise : (it['动作'] || ''))).trim();
+        if (!nm) return;
+        var inSets = Array.isArray(it.sets) ? it.sets : [];
+        var sets = [];
+        inSets.forEach(function (s) {
+          var w = null, r = null;
+          if (typeof s === 'number'){ r = s; }
+          else if (s && typeof s === 'object'){
+            w = packNum(s, ['w','kg','weight','重量']);
+            r = packNum(s, ['r','reps','次数']);
+          } else return;
+          if (w == null && r == null) return;
+          if (w != null && (w < 0 || w > 600)) return;
+          if (r != null && (r < 0 || r > 500)) return;
+          sets.push({ w: w, r: r, done: true });
+        });
+        if (!sets.length) return;
+        items.push({ name: nm, sets: sets });
+      });
+      if (!items.length) return;
+      S.logs[dk] = { items: items, imported: true };   /* imported: 渲染时不再补计划动作 */
+      res.days++;
+      res.moves += items.length;
+    });
+  }
   return res;
 }
 
@@ -4383,15 +4482,27 @@ function importPackText(raw){
   if (!data || typeof data !== 'object'){ toast(ENm ? 'That is not valid JSON' : '这段内容不是有效的 JSON'); return false; }
   if (data.logs && data.profile){ toast(ENm ? 'This is a full backup — import it under About · Backup' : '这是完整备份，请到「关于 · 备份」里导入'); return false; }
   var res = applyPack(data);
-  if (!res.body && !res.foods && !res.weights){ toast(ENm ? 'No usable fields found — check the format' : '没找到能导入的字段，检查一下格式'); return false; }
+  if (!res.body && !res.foods && !res.weights && !res.days){
+    if (res.skipped){
+      toast(ENm ? (res.skipped + ' days already have records — nothing changed')
+                : (res.skipped + ' 天已有记录，没有改动'));
+      return false;
+    }
+    toast(ENm ? 'No usable fields found — check the format' : '没找到能导入的字段，检查一下格式');
+    return false;
+  }
   save(); render();
   toast(ENm
     ? ('Imported ' + [res.body ? res.body + ' body fields' : '',
                       res.foods ? res.foods + ' foods' : '',
-                      res.weights ? res.weights + ' weigh-ins' : ''].filter(Boolean).join(' · '))
+                      res.weights ? res.weights + ' weigh-ins' : '',
+                      res.days ? res.days + ' workouts (' + res.moves + ' exercises)' : '',
+                      res.skipped ? res.skipped + ' days already logged, skipped' : ''].filter(Boolean).join(' · '))
     : ('已导入' + (res.body ? ' 身体 ' + res.body + ' 项' : '') +
        (res.foods ? ' · 食材 ' + res.foods + ' 种' : '') +
-       (res.weights ? ' · 体重 ' + res.weights + ' 条' : '')));
+       (res.weights ? ' · 体重 ' + res.weights + ' 条' : '') +
+       (res.days ? ' · 训练 ' + res.days + ' 天 ' + res.moves + ' 个动作' : '') +
+       (res.skipped ? '（' + res.skipped + ' 天已有记录，已跳过）' : '')));
   return true;
 }
 
@@ -4430,6 +4541,11 @@ var PACK_PROMPT_ZH = [
 '  ],',
 '  "weights": [',
 '    { "date": "2026-11-19", "kg": 72.4 }',
+'  ],',
+'  "workouts": [',
+'    { "date": "2026-10-21", "items": [',
+'      { "name": "窄距高位下拉", "sets": [ { "w": 47, "r": 10 }, { "w": 47, "r": 10 } ] }',
+'    ] }',
 '  ]',
 '}',
 '',
@@ -4443,7 +4559,8 @@ var PACK_PROMPT_ZH = [
 '7. foods 里没有的食物不要编；同一种食物出现两次就合并成一条。',
 '8. 输出必须是能被 JSON.parse 直接解析的纯文本（UTF-8，不要 BOM）。',
 '9. name 只用中文或英文：原文里的德语、法语等外文名一律去掉，包装上的「每 100 ml」「干重」这类说明也不要写。例如写「全燕麦片」，不要写「全燕麦片（Hafervollkornflocken）」。',
-'10. name 控制在 12 个字以内，不带括号补充；同一食物在不同截图里名字不一致时，统一成一个最简洁的写法。'
+'10. name 控制在 12 个字以内，不带括号补充；同一食物在不同截图里名字不一致时，统一成一个最简洁的写法。',
+'11. workouts 只放截图里确实有的训练记录：date 写 YYYY-MM-DD，每个动作按实际做的组拆成一组一条（w 是重量 kg，r 是次数），自重写 0，公斤和次数读不清就整组省略；动作名用常见中文名，不要编造。'
 ].join('\n');
 
 var PACK_PROMPT_EN = [
@@ -4480,6 +4597,11 @@ var PACK_PROMPT_EN = [
 '  ],',
 '  "weights": [',
 '    { "date": "2026-11-19", "kg": 72.4 }',
+'  ],',
+'  "workouts": [',
+'    { "date": "2026-10-21", "items": [',
+'      { "name": "Wide-grip pulldown", "sets": [ { "w": 47, "r": 10 }, { "w": 47, "r": 10 } ] }',
+'    ] }',
 '  ]',
 '}',
 '',
@@ -4493,7 +4615,8 @@ var PACK_PROMPT_EN = [
 '7. Do not invent foods. Merge duplicate foods into one entry.',
 '8. The output must be plain text that JSON.parse can read directly (UTF-8, no BOM).',
 '9. name must be Chinese or English only: drop German, French or any other original-language name from the label, and drop measuring notes such as "per 100 ml" or "dry weight". Write "Rolled oats", not "Rolled oats (Hafervollkornflocken)".',
-'10. Keep name under 20 characters, no parenthetical additions. If the same food is spelled differently across screenshots, unify it to the shortest clear form.'
+'10. Keep name under 20 characters, no parenthetical additions. If the same food is spelled differently across screenshots, unify it to the shortest clear form.',
+'11. workouts should only contain training actually shown in the screenshot: date as YYYY-MM-DD, one set per entry (w = kg, r = reps), use 0 for bodyweight, and drop a set entirely if the load or reps are unreadable. Do not invent exercises.'
 ].join('\n');
 
 function packPrompt(){ return (S.lang === 'en') ? PACK_PROMPT_EN : PACK_PROMPT_ZH; }
@@ -4535,8 +4658,8 @@ function packImportHtml(){
   var nW = Object.keys(S.weights || {}).length;
   var html = '';
   html += '<p class="pack-note">' + (ENm
-    ? 'Paste the JSON text an AI gives you — that is the main route. A <b>.json</b> file works too. Either way it only writes <b>body data</b> (the numbers on the Body model page) and <b>custom foods</b> (nutrition per 100 g). Training logs, food logs and the schedule are left alone.'
-    : '把 AI 给的 <b>JSON 文本</b>直接粘进下面的框，这是主要方式；有 <b>.json</b> 文件也可以导入。两种方式都只写<b>身体数据</b>（「身体模型」页那些数字）和<b>自定义食材</b>（每 100 g 的营养），训练记录、饮食记录、周计划都不动。') + '</p>';
+    ? 'Paste the JSON text an AI gives you — that is the main route. A <b>.json</b> file works too. It writes <b>body data</b>, <b>custom foods</b>, <b>weigh-ins</b> and <b>past workouts</b> (only the dates you list; a day that already has records is skipped). Food logs and the schedule are left alone.'
+    : '把 AI 给的 <b>JSON 文本</b>直接粘进下面的框，这是主要方式；有 <b>.json</b> 文件也可以导入。会写入<b>身体数据</b>、<b>自定义食材</b>、<b>体重记录</b>和<b>历史训练记录</b>（只写你给的日期，那天已有记录就跳过），饮食记录和周计划不动。') + '</p>';
   html += '<div class="pack-paste" id="packBox">' +
           '<textarea id="packPaste" rows="4" spellcheck="false" placeholder="' +
             (ENm ? 'Paste the JSON here' : '把 AI 给的 JSON 粘到这里') + '">' + h(packDraft) + '</textarea>' +
@@ -4635,11 +4758,11 @@ function viewPlugins(){
 
 /* ================= 主渲染 ================= */
 var VIEW_META = {
-  week:      { title:'周计划', sub:'训练日高亮 · 每肌群周容量 · RIR' },
-  nutrition: { title:'营养',   sub:'已吃 / 应吃 · 缺口换算' },
-  body:      { title:'身体模型', sub:'体重均值驱动 · 改一个数全部重算' },
+  week:      { title:'周计划', sub:'' },
+  nutrition: { title:'营养',   sub:'' },
+  body:      { title:'身体模型', sub:'' },
   templates: { title:'模板',   sub:'训练法库 · 按目标排序 · 存一次复用三个月' },
-  plugins:   { title:'设置', sub:'插件 · 显示 · 语言 · 关于' },
+  plugins:   { title:'设置', sub:'' },
 };
 
 function render(){
@@ -4946,6 +5069,7 @@ document.addEventListener('click', function (e) {
     S.weekly.sessions = Math.min(S.weekly.sessions, arr.length);
     if (S.weekly.sessions < arr.length && S.weekly.sessions < 2) S.weekly.sessions = 2;
     S.weekly.sessions = Math.max(2, Math.min(S.weekly.sessions, arr.length));
+    bumpScheduleSince();
     save(); render(); return;
   }
 
@@ -5050,6 +5174,7 @@ document.addEventListener('click', function (e) {
     S.weekly.split = m.split;
     S.weekly.sessions = m.sessions;
     S.weekly.days = m.days.slice();
+    bumpScheduleSince();
     delete S.plans[iso(currentMonday())];
     save(); render();
     toast('已套用「' + m.name + '」');
@@ -5062,6 +5187,7 @@ document.addEventListener('click', function (e) {
     S.weekly.split = ms.split;
     S.weekly.sessions = ms.sessions;
     S.weekly.days = ms.days.slice();
+    bumpScheduleSince();
     delete S.plans[iso(currentMonday())];
     save(); render();
     toast('课表已换成「' + ms.name + '」，目标与吃法没动');
@@ -5070,6 +5196,11 @@ document.addEventListener('click', function (e) {
 
   if (a === 'tplExpand'){
     S.ui.tplExpand = !S.ui.tplExpand;
+    save(); render(); return;
+  }
+
+  if (a === 'howtoToggle'){
+    S.ui.howtoOpen = !S.ui.howtoOpen;
     save(); render(); return;
   }
 
