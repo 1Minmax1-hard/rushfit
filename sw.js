@@ -3,7 +3,7 @@
    1) 安装时逐个预缓存，单个资源失败不影响 index.html 入库；
    2) 页面导航「网络优先 + 2.5 s 超时回退缓存」：网络正常拿新版，断网或卡住就秒开缓存；
    3) 其余静态资源缓存优先 + 后台更新。 */
-const CACHE = 'rushfit-v22';
+const CACHE = 'rushfit-v23';
 const PAGE = './index.html';
 const ASSETS = [
   './index.html',

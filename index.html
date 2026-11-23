@@ -1707,7 +1707,7 @@ function defaultState(){
           nutDate: iso(t), meals:3, meat:'chicken', carb:'rice', meatBf:true,
           chipEdit:false, addFood:false, replaceFor:null, qfFood:null,
           editGroup:null, editFoodId:null,
-          plugTab:'pack', capMode:'bar', pickSession:null, tplExpand:false, howtoOpen:false }
+          plugTab:'pack', capMode:'bar', pickSession:null, tplExpand:false, howtoOpen:false, goalOpen:false }
   };
 }
 
@@ -1786,7 +1786,7 @@ function migrate(s){
     s.migr = 1;
   }
   if (!s.ui) s.ui = d.ui;
-  ['calMode','monthOffset','manageFoods','addFood','replaceFor','capMode','pickSession','tplExpand','plugTab','editGroup','editFoodId','howtoOpen'].forEach(function(k){
+  ['calMode','monthOffset','manageFoods','addFood','replaceFor','capMode','pickSession','tplExpand','plugTab','editGroup','editFoodId','howtoOpen','goalOpen'].forEach(function(k){
     if (s.ui[k] === undefined) s.ui[k] = d.ui[k];
   });
   if (!s.ui.capMode) s.ui.capMode = 'bar';
@@ -4105,23 +4105,32 @@ function viewBody(){
   }
   html += '</div></div>';
 
-  /* 策略说明 */
-  html += '<div class="card"><div class="card-hd"><h3>当前策略：' + GOALS[S.goal].label + '</h3></div><div class="card-bd">';
-  html += '<p style="font-size:13px;color:var(--ink-2);margin-bottom:6px"><b>' + GOALS[S.goal].what + '</b></p>';
-  html += '<p style="font-size:13px;color:var(--ink-2)">' + GOALS[S.goal].tip + '</p>';
-  /* 五个策略的关键参数：用可换行的行式列表，窄屏不会被挤成竖条 */
-  html += '<div class="goal-rows">';
-  GOAL_ORDER.forEach(function (k) {
-    var g = GOALS[k];
-    html += '<div class="goal-row' + (k===S.goal?' on':'') + '">' +
-      '<b>' + g.label + '</b>' +
-      '<span>' + Math.round(g.kcal*100) + '% TDEE</span>' +
-      '<span>蛋白 ' + g.proteinKg + ' g/kg</span>' +
-      '<span>脂肪 ' + g.fatTrain + ' / ' + g.fatRest + ' g/kg</span>' +
-      '</div>';
-  });
+  /* 策略说明：默认折叠，点开才看处方参数 */
+  var goalOpen = !!S.ui.goalOpen;
+  html += '<div class="card howto' + (goalOpen ? ' open' : '') + '">' +
+    '<button class="howto-hd" data-action="goalToggle" aria-expanded="' + (goalOpen ? 'true' : 'false') + '">' +
+      '<span class="howto-title">当前策略：' + GOALS[S.goal].label + '</span>' +
+      '<span class="howto-chev" aria-hidden="true">' + (goalOpen ? '−' : '+') + '</span>' +
+    '</button>';
+  if (goalOpen){
+    html += '<div class="card-bd">';
+    html += '<p style="font-size:13px;color:var(--ink-2);margin-bottom:6px"><b>' + GOALS[S.goal].what + '</b></p>';
+    html += '<p style="font-size:13px;color:var(--ink-2)">' + GOALS[S.goal].tip + '</p>';
+    /* 五个策略的关键参数：用可换行的行式列表，窄屏不会被挤成竖条 */
+    html += '<div class="goal-rows">';
+    GOAL_ORDER.forEach(function (k) {
+      var g = GOALS[k];
+      html += '<div class="goal-row' + (k===S.goal?' on':'') + '">' +
+        '<b>' + g.label + '</b>' +
+        '<span>' + Math.round(g.kcal*100) + '% TDEE</span>' +
+        '<span>蛋白 ' + g.proteinKg + ' g/kg</span>' +
+        '<span>脂肪 ' + g.fatTrain + ' / ' + g.fatRest + ' g/kg</span>' +
+        '</div>';
+    });
+    html += '</div>';
+    html += '</div>';
+  }
   html += '</div>';
-  html += '</div></div>';
 
   html += '</div></div>';
   return html;
@@ -5223,6 +5232,11 @@ document.addEventListener('click', function (e) {
 
   if (a === 'howtoToggle'){
     S.ui.howtoOpen = !S.ui.howtoOpen;
+    save(); render(); return;
+  }
+
+  if (a === 'goalToggle'){
+    S.ui.goalOpen = !S.ui.goalOpen;
     save(); render(); return;
   }
 
